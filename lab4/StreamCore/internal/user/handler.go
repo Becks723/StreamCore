@@ -119,3 +119,21 @@ func (s *UserServiceImpl) MFABind(ctx context.Context, req *user.MFABindReq) (re
 	}
 	return resp, nil
 }
+
+// MFAVerify implements the UserServiceImpl interface.
+func (s *UserServiceImpl) MFAVerify(ctx context.Context, req *user.MFAVerifyReq) (resp *user.MFAVerifyResp, err error) {
+	resp = new(user.MFAVerifyResp)
+
+	uid, err := rpccontext.RetrieveLoginUid(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("UserService.MFAVerify: get login uid failed: %w", err)
+	}
+
+	err = service.NewUserService(ctx, s.infra).MFAVerify(uid, req)
+	if err != nil {
+		resp.Base = pack.BuildBaseResp(err)
+	} else {
+		resp.Base = pack.BuildSuccessResp()
+	}
+	return resp, nil
+}

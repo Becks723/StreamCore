@@ -24,6 +24,7 @@ func Register(r *server.Hertz) {
 			_mfa := _auth.Group("/mfa", _mfaMw()...)
 			_mfa.POST("/bind", append(_mfabindMw(), api.MFABind)...)
 			_mfa.GET("/qrcode", append(_mfaqrcodeMw(), api.MFAQrcode)...)
+			_mfa.POST("/verify", append(_mfaverifyMw(), api.MFAVerify)...)
 		}
 	}
 	{

@@ -19,13 +19,13 @@ const (
 	JWT_AccessTokenExpiration  = 12 * time.Hour
 	JWT_RefreshTokenExpiration = 7 * 24 * time.Hour
 
-	MFA_QrcodeWidth  = 256
-	MFA_QrcodeHeight = 256
-
-	TOTPSecretExpiry = 10 * time.Minute
-	TOTPInterval     = 30 // second
-	TOTPFailureLimit = 10
-	TOTPFailureReset = 5 * time.Minute
+	MFAQrcodeWidth   = 256
+	MFAQrcodeHeight  = 256
+	MFATokenExpiry   = 10 * time.Minute // mfa token ttl
+	TOTPSecretExpiry = 10 * time.Minute // totp密钥ttl
+	TOTPInterval     = 30               // totp验证码刷新间隔，秒
+	TOTPFailureLimit = 10               // 规定时间内最多允许的绑定失败次数，防爆破用
+	TOTPFailureReset = 5 * time.Minute  // 防爆破的刷新时间
 
 	MuxConnection = 1
 

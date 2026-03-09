@@ -55,6 +55,13 @@ var serviceMethods = map[string]kitex.MethodInfo{
 		false,
 		kitex.WithStreamingMode(kitex.StreamingNone),
 	),
+	"MFAVerify": kitex.NewMethodInfo(
+		mFAVerifyHandler,
+		newUserServiceMFAVerifyArgs,
+		newUserServiceMFAVerifyResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingNone),
+	),
 }
 
 var (
@@ -229,6 +236,24 @@ func newUserServiceMFABindResult() interface{} {
 	return user.NewUserServiceMFABindResult()
 }
 
+func mFAVerifyHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*user.UserServiceMFAVerifyArgs)
+	realResult := result.(*user.UserServiceMFAVerifyResult)
+	success, err := handler.(user.UserService).MFAVerify(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newUserServiceMFAVerifyArgs() interface{} {
+	return user.NewUserServiceMFAVerifyArgs()
+}
+
+func newUserServiceMFAVerifyResult() interface{} {
+	return user.NewUserServiceMFAVerifyResult()
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -294,6 +319,16 @@ func (p *kClient) MFABind(ctx context.Context, req *user.MFABindReq) (r *user.MF
 	_args.Req = req
 	var _result user.UserServiceMFABindResult
 	if err = p.c.Call(ctx, "MFABind", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) MFAVerify(ctx context.Context, req *user.MFAVerifyReq) (r *user.MFAVerifyResp, err error) {
+	var _args user.UserServiceMFAVerifyArgs
+	_args.Req = req
+	var _result user.UserServiceMFAVerifyResult
+	if err = p.c.Call(ctx, "MFAVerify", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil
