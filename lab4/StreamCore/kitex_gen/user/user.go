@@ -3,10 +3,9 @@
 package user
 
 import (
+	"StreamCore/kitex_gen/common"
 	"context"
 	"fmt"
-
-	"StreamCore/kitex_gen/common"
 )
 
 type RegisterReq struct {
@@ -86,9 +85,8 @@ var fieldIDToName_RegisterResp = map[int16]string{
 }
 
 type LoginReq struct {
-	Username string  `thrift:"username,1,required" frugal:"1,required,string" json:"username"`
-	Password string  `thrift:"password,2,required" frugal:"2,required,string" json:"password"`
-	Code     *string `thrift:"code,3,optional" frugal:"3,optional,string" json:"code,omitempty"`
+	Username string `thrift:"username,1,required" frugal:"1,required,string" json:"username"`
+	Password string `thrift:"password,2,required" frugal:"2,required,string" json:"password"`
 }
 
 func NewLoginReq() *LoginReq {
@@ -105,27 +103,11 @@ func (p *LoginReq) GetUsername() (v string) {
 func (p *LoginReq) GetPassword() (v string) {
 	return p.Password
 }
-
-var LoginReq_Code_DEFAULT string
-
-func (p *LoginReq) GetCode() (v string) {
-	if !p.IsSetCode() {
-		return LoginReq_Code_DEFAULT
-	}
-	return *p.Code
-}
 func (p *LoginReq) SetUsername(val string) {
 	p.Username = val
 }
 func (p *LoginReq) SetPassword(val string) {
 	p.Password = val
-}
-func (p *LoginReq) SetCode(val *string) {
-	p.Code = val
-}
-
-func (p *LoginReq) IsSetCode() bool {
-	return p.Code != nil
 }
 
 func (p *LoginReq) String() string {
@@ -138,7 +120,6 @@ func (p *LoginReq) String() string {
 var fieldIDToName_LoginReq = map[int16]string{
 	1: "username",
 	2: "password",
-	3: "code",
 }
 
 type LoginResp struct {
@@ -301,7 +282,7 @@ var fieldIDToName_InfoResp = map[int16]string{
 }
 
 type AvatarReq struct {
-	Data []byte `thrift:"data,1,required" frugal:"1,required,binary" json:"data"`
+	Data []byte `thrift:"data,1,optional" frugal:"1,optional,binary" json:"data,omitempty"`
 }
 
 func NewAvatarReq() *AvatarReq {
@@ -311,11 +292,20 @@ func NewAvatarReq() *AvatarReq {
 func (p *AvatarReq) InitDefault() {
 }
 
+var AvatarReq_Data_DEFAULT []byte
+
 func (p *AvatarReq) GetData() (v []byte) {
+	if !p.IsSetData() {
+		return AvatarReq_Data_DEFAULT
+	}
 	return p.Data
 }
 func (p *AvatarReq) SetData(val []byte) {
 	p.Data = val
+}
+
+func (p *AvatarReq) IsSetData() bool {
+	return p.Data != nil
 }
 
 func (p *AvatarReq) String() string {
@@ -536,6 +526,82 @@ var fieldIDToName_MFABindResp = map[int16]string{
 	1: "base",
 }
 
+type MFAVerifyReq struct {
+	MfaToken string `thrift:"mfa_token,1,required" frugal:"1,required,string" json:"mfa_token"`
+	Code     string `thrift:"code,2,required" frugal:"2,required,string" json:"code"`
+}
+
+func NewMFAVerifyReq() *MFAVerifyReq {
+	return &MFAVerifyReq{}
+}
+
+func (p *MFAVerifyReq) InitDefault() {
+}
+
+func (p *MFAVerifyReq) GetMfaToken() (v string) {
+	return p.MfaToken
+}
+
+func (p *MFAVerifyReq) GetCode() (v string) {
+	return p.Code
+}
+func (p *MFAVerifyReq) SetMfaToken(val string) {
+	p.MfaToken = val
+}
+func (p *MFAVerifyReq) SetCode(val string) {
+	p.Code = val
+}
+
+func (p *MFAVerifyReq) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("MFAVerifyReq(%+v)", *p)
+}
+
+var fieldIDToName_MFAVerifyReq = map[int16]string{
+	1: "mfa_token",
+	2: "code",
+}
+
+type MFAVerifyResp struct {
+	Base *common.BaseResp `thrift:"base,1,required" frugal:"1,required,common.BaseResp" json:"base"`
+}
+
+func NewMFAVerifyResp() *MFAVerifyResp {
+	return &MFAVerifyResp{}
+}
+
+func (p *MFAVerifyResp) InitDefault() {
+}
+
+var MFAVerifyResp_Base_DEFAULT *common.BaseResp
+
+func (p *MFAVerifyResp) GetBase() (v *common.BaseResp) {
+	if !p.IsSetBase() {
+		return MFAVerifyResp_Base_DEFAULT
+	}
+	return p.Base
+}
+func (p *MFAVerifyResp) SetBase(val *common.BaseResp) {
+	p.Base = val
+}
+
+func (p *MFAVerifyResp) IsSetBase() bool {
+	return p.Base != nil
+}
+
+func (p *MFAVerifyResp) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("MFAVerifyResp(%+v)", *p)
+}
+
+var fieldIDToName_MFAVerifyResp = map[int16]string{
+	1: "base",
+}
+
 type UserService interface {
 	Register(ctx context.Context, req *RegisterReq) (r *RegisterResp, err error)
 
@@ -548,6 +614,8 @@ type UserService interface {
 	MFAQrcode(ctx context.Context, req *MFAQrcodeReq) (r *MFAQrcodeResp, err error)
 
 	MFABind(ctx context.Context, req *MFABindReq) (r *MFABindResp, err error)
+
+	MFAVerify(ctx context.Context, req *MFAVerifyReq) (r *MFAVerifyResp, err error)
 }
 
 type UserServiceRegisterArgs struct {
@@ -1003,5 +1071,81 @@ func (p *UserServiceMFABindResult) String() string {
 }
 
 var fieldIDToName_UserServiceMFABindResult = map[int16]string{
+	0: "success",
+}
+
+type UserServiceMFAVerifyArgs struct {
+	Req *MFAVerifyReq `thrift:"req,1,required" frugal:"1,required,MFAVerifyReq" json:"req"`
+}
+
+func NewUserServiceMFAVerifyArgs() *UserServiceMFAVerifyArgs {
+	return &UserServiceMFAVerifyArgs{}
+}
+
+func (p *UserServiceMFAVerifyArgs) InitDefault() {
+}
+
+var UserServiceMFAVerifyArgs_Req_DEFAULT *MFAVerifyReq
+
+func (p *UserServiceMFAVerifyArgs) GetReq() (v *MFAVerifyReq) {
+	if !p.IsSetReq() {
+		return UserServiceMFAVerifyArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+func (p *UserServiceMFAVerifyArgs) SetReq(val *MFAVerifyReq) {
+	p.Req = val
+}
+
+func (p *UserServiceMFAVerifyArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *UserServiceMFAVerifyArgs) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("UserServiceMFAVerifyArgs(%+v)", *p)
+}
+
+var fieldIDToName_UserServiceMFAVerifyArgs = map[int16]string{
+	1: "req",
+}
+
+type UserServiceMFAVerifyResult struct {
+	Success *MFAVerifyResp `thrift:"success,0,optional" frugal:"0,optional,MFAVerifyResp" json:"success,omitempty"`
+}
+
+func NewUserServiceMFAVerifyResult() *UserServiceMFAVerifyResult {
+	return &UserServiceMFAVerifyResult{}
+}
+
+func (p *UserServiceMFAVerifyResult) InitDefault() {
+}
+
+var UserServiceMFAVerifyResult_Success_DEFAULT *MFAVerifyResp
+
+func (p *UserServiceMFAVerifyResult) GetSuccess() (v *MFAVerifyResp) {
+	if !p.IsSetSuccess() {
+		return UserServiceMFAVerifyResult_Success_DEFAULT
+	}
+	return p.Success
+}
+func (p *UserServiceMFAVerifyResult) SetSuccess(x interface{}) {
+	p.Success = x.(*MFAVerifyResp)
+}
+
+func (p *UserServiceMFAVerifyResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *UserServiceMFAVerifyResult) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("UserServiceMFAVerifyResult(%+v)", *p)
+}
+
+var fieldIDToName_UserServiceMFAVerifyResult = map[int16]string{
 	0: "success",
 }

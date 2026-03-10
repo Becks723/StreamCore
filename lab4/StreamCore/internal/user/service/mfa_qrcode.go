@@ -11,9 +11,11 @@ import (
 	"github.com/pquerna/otp/totp"
 )
 
+// MFAQrcode 生成mfa的密钥和二维码
 func (s *UserService) MFAQrcode(uid uint) (*common.MFAInfo, error) {
 	var err error
 
+	// generate totp secret
 	key, err := totp.Generate(totp.GenerateOpts{
 		Issuer:      "StreamCore",
 		AccountName: strconv.FormatUint(uint64(uid), 10),
@@ -23,21 +25,23 @@ func (s *UserService) MFAQrcode(uid uint) (*common.MFAInfo, error) {
 	}
 	secret := key.Secret()
 
-	w := constants.MFA_QrcodeWidth
-	h := constants.MFA_QrcodeHeight
+	// generate totp qrcode
+	w := constants.MFAQrcodeWidth
+	h := constants.MFAQrcodeHeight
 	img, err := key.Image(w, h)
 	if err != nil {
 		return nil, err
 	}
-
+	// encode img to png (binary)
 	var buf bytes.Buffer
-	if err = png.Encode(&buf, img); err != nil { // encode img to png (binary)
+	if err = png.Encode(&buf, img); err != nil {
 		return nil, err
 	}
-	qrcode := base64.StdEncoding.EncodeToString(buf.Bytes()) // base64
+	// base64 wrapper
+	qrcode := base64.StdEncoding.EncodeToString(buf.Bytes())
 
 	// cache secret
-	err = s.cache.SetTOTPPending(s.ctx, uid, secret)
+	err = s.cache.SetTOTPPending(s.ctx, uid, secret, constants.TOTPSecretExpiry)
 	if err != nil {
 		return nil, err
 	}

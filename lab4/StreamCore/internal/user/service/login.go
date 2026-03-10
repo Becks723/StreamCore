@@ -1,6 +1,8 @@
 package service
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"errors"
 	"fmt"
 
@@ -27,18 +29,36 @@ func (s *UserService) Login(req *user.LoginReq) (*common.UserInfo, *common.Authe
 	}
 
 	// generate access, refresh tokens
-	atoken, err := jwt.GenerateAccessToken(u.Id, constants.JWT_AccessSecret, constants.JWT_AccessTokenExpiration)
+	access, err := jwt.GenerateAccessToken(u.Id, constants.JWT_AccessSecret, constants.JWT_AccessTokenExpiration)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed gen accessToken: %w", err)
 	}
-	rtoken, err := jwt.GenerateRefreshToken(u.Id, constants.JWT_RefreshSecret, constants.JWT_RefreshTokenExpiration)
+	refresh, err := jwt.GenerateRefreshToken(u.Id, constants.JWT_RefreshSecret, constants.JWT_RefreshTokenExpiration)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed gen refreshToken: %w", err)
 	}
 
+	// deal with mfa token
+	mfaToken := ""
+	if u.TOTPBound {
+		mfaToken = s.generateMFAToken()
+		// cache mfa token
+		if err = s.cache.SetMFATokenUser(s.ctx, mfaToken, u.Id, constants.MFATokenExpiry); err != nil {
+			return nil, nil, fmt.Errorf("failed cache.SetMFATokenUser: %w", err)
+		}
+	}
+
 	auth := &common.AuthenticationInfo{
-		AccessToken:  atoken,
-		RefreshToken: rtoken,
+		AccessToken:  access,
+		RefreshToken: refresh,
+		MfaRequired:  u.TOTPBound,
+		MfaToken:     mfaToken,
 	}
 	return pack.UserInfo(u), auth, nil
+}
+
+func (s *UserService) generateMFAToken() string {
+	buf := make([]byte, 32)
+	_, _ = rand.Read(buf)
+	return base64.RawStdEncoding.EncodeToString(buf)
 }

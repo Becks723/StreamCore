@@ -14,7 +14,6 @@ struct RegisterResp {
 struct LoginReq {
     1: required string username
     2: required string password
-    3: optional string code
 }
 
 struct LoginResp {
@@ -57,6 +56,15 @@ struct MFABindResp {
     1: required common.BaseResp base
 }
 
+struct MFAVerifyReq {
+    1: required string mfa_token // MFA token
+    2: required string code      // 六位校验码
+}
+
+struct MFAVerifyResp {
+    1: required common.BaseResp base
+}
+
 service UserService {
     RegisterResp  Register(1: required RegisterReq req)
     LoginResp     Login(1: required LoginReq req)
@@ -64,4 +72,5 @@ service UserService {
     AvatarResp    UploadAvatar(1: required AvatarReq req)
     MFAQrcodeResp MFAQrcode(1: required MFAQrcodeReq req)
     MFABindResp   MFABind(1: required MFABindReq req)
+    MFAVerifyResp MFAVerify(1: required MFAVerifyReq req)
 }

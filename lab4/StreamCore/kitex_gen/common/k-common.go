@@ -549,6 +549,8 @@ func (p *AuthenticationInfo) FastRead(buf []byte) (int, error) {
 	var fieldId int16
 	var issetAccessToken bool = false
 	var issetRefreshToken bool = false
+	var issetMfaRequired bool = false
+	var issetMfaToken bool = false
 	for {
 		fieldTypeId, fieldId, l, err = thrift.Binary.ReadFieldBegin(buf[offset:])
 		offset += l
@@ -589,6 +591,36 @@ func (p *AuthenticationInfo) FastRead(buf []byte) (int, error) {
 					goto SkipFieldError
 				}
 			}
+		case 3:
+			if fieldTypeId == thrift.BOOL {
+				l, err = p.FastReadField3(buf[offset:])
+				offset += l
+				if err != nil {
+					goto ReadFieldError
+				}
+				issetMfaRequired = true
+			} else {
+				l, err = thrift.Binary.Skip(buf[offset:], fieldTypeId)
+				offset += l
+				if err != nil {
+					goto SkipFieldError
+				}
+			}
+		case 4:
+			if fieldTypeId == thrift.STRING {
+				l, err = p.FastReadField4(buf[offset:])
+				offset += l
+				if err != nil {
+					goto ReadFieldError
+				}
+				issetMfaToken = true
+			} else {
+				l, err = thrift.Binary.Skip(buf[offset:], fieldTypeId)
+				offset += l
+				if err != nil {
+					goto SkipFieldError
+				}
+			}
 		default:
 			l, err = thrift.Binary.Skip(buf[offset:], fieldTypeId)
 			offset += l
@@ -605,6 +637,16 @@ func (p *AuthenticationInfo) FastRead(buf []byte) (int, error) {
 
 	if !issetRefreshToken {
 		fieldId = 2
+		goto RequiredFieldNotSetError
+	}
+
+	if !issetMfaRequired {
+		fieldId = 3
+		goto RequiredFieldNotSetError
+	}
+
+	if !issetMfaToken {
+		fieldId = 4
 		goto RequiredFieldNotSetError
 	}
 	return offset, nil
@@ -646,6 +688,34 @@ func (p *AuthenticationInfo) FastReadField2(buf []byte) (int, error) {
 	return offset, nil
 }
 
+func (p *AuthenticationInfo) FastReadField3(buf []byte) (int, error) {
+	offset := 0
+
+	var _field bool
+	if v, l, err := thrift.Binary.ReadBool(buf[offset:]); err != nil {
+		return offset, err
+	} else {
+		offset += l
+		_field = v
+	}
+	p.MfaRequired = _field
+	return offset, nil
+}
+
+func (p *AuthenticationInfo) FastReadField4(buf []byte) (int, error) {
+	offset := 0
+
+	var _field string
+	if v, l, err := thrift.Binary.ReadString(buf[offset:]); err != nil {
+		return offset, err
+	} else {
+		offset += l
+		_field = v
+	}
+	p.MfaToken = _field
+	return offset, nil
+}
+
 func (p *AuthenticationInfo) FastWrite(buf []byte) int {
 	return p.FastWriteNocopy(buf, nil)
 }
@@ -653,8 +723,10 @@ func (p *AuthenticationInfo) FastWrite(buf []byte) int {
 func (p *AuthenticationInfo) FastWriteNocopy(buf []byte, w thrift.NocopyWriter) int {
 	offset := 0
 	if p != nil {
+		offset += p.fastWriteField3(buf[offset:], w)
 		offset += p.fastWriteField1(buf[offset:], w)
 		offset += p.fastWriteField2(buf[offset:], w)
+		offset += p.fastWriteField4(buf[offset:], w)
 	}
 	offset += thrift.Binary.WriteFieldStop(buf[offset:])
 	return offset
@@ -665,6 +737,8 @@ func (p *AuthenticationInfo) BLength() int {
 	if p != nil {
 		l += p.field1Length()
 		l += p.field2Length()
+		l += p.field3Length()
+		l += p.field4Length()
 	}
 	l += thrift.Binary.FieldStopLength()
 	return l
@@ -684,6 +758,20 @@ func (p *AuthenticationInfo) fastWriteField2(buf []byte, w thrift.NocopyWriter) 
 	return offset
 }
 
+func (p *AuthenticationInfo) fastWriteField3(buf []byte, w thrift.NocopyWriter) int {
+	offset := 0
+	offset += thrift.Binary.WriteFieldBegin(buf[offset:], thrift.BOOL, 3)
+	offset += thrift.Binary.WriteBool(buf[offset:], p.MfaRequired)
+	return offset
+}
+
+func (p *AuthenticationInfo) fastWriteField4(buf []byte, w thrift.NocopyWriter) int {
+	offset := 0
+	offset += thrift.Binary.WriteFieldBegin(buf[offset:], thrift.STRING, 4)
+	offset += thrift.Binary.WriteStringNocopy(buf[offset:], w, p.MfaToken)
+	return offset
+}
+
 func (p *AuthenticationInfo) field1Length() int {
 	l := 0
 	l += thrift.Binary.FieldBeginLength()
@@ -695,6 +783,20 @@ func (p *AuthenticationInfo) field2Length() int {
 	l := 0
 	l += thrift.Binary.FieldBeginLength()
 	l += thrift.Binary.StringLengthNocopy(p.RefreshToken)
+	return l
+}
+
+func (p *AuthenticationInfo) field3Length() int {
+	l := 0
+	l += thrift.Binary.FieldBeginLength()
+	l += thrift.Binary.BoolLength()
+	return l
+}
+
+func (p *AuthenticationInfo) field4Length() int {
+	l := 0
+	l += thrift.Binary.FieldBeginLength()
+	l += thrift.Binary.StringLengthNocopy(p.MfaToken)
 	return l
 }
 

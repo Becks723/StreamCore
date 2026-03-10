@@ -17,6 +17,7 @@ type Client interface {
 	UploadAvatar(ctx context.Context, req *user.AvatarReq, callOptions ...callopt.Option) (r *user.AvatarResp, err error)
 	MFAQrcode(ctx context.Context, req *user.MFAQrcodeReq, callOptions ...callopt.Option) (r *user.MFAQrcodeResp, err error)
 	MFABind(ctx context.Context, req *user.MFABindReq, callOptions ...callopt.Option) (r *user.MFABindResp, err error)
+	MFAVerify(ctx context.Context, req *user.MFAVerifyReq, callOptions ...callopt.Option) (r *user.MFAVerifyResp, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -76,4 +77,9 @@ func (p *kUserServiceClient) MFAQrcode(ctx context.Context, req *user.MFAQrcodeR
 func (p *kUserServiceClient) MFABind(ctx context.Context, req *user.MFABindReq, callOptions ...callopt.Option) (r *user.MFABindResp, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.MFABind(ctx, req)
+}
+
+func (p *kUserServiceClient) MFAVerify(ctx context.Context, req *user.MFAVerifyReq, callOptions ...callopt.Option) (r *user.MFAVerifyResp, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.MFAVerify(ctx, req)
 }

@@ -121,6 +121,8 @@ var fieldIDToName_UserInfo = map[int16]string{
 type AuthenticationInfo struct {
 	AccessToken  string `thrift:"access_token,1,required" frugal:"1,required,string" json:"access_token"`
 	RefreshToken string `thrift:"refresh_token,2,required" frugal:"2,required,string" json:"refresh_token"`
+	MfaRequired  bool   `thrift:"mfa_required,3,required" frugal:"3,required,bool" json:"mfa_required"`
+	MfaToken     string `thrift:"mfa_token,4,required" frugal:"4,required,string" json:"mfa_token"`
 }
 
 func NewAuthenticationInfo() *AuthenticationInfo {
@@ -137,11 +139,25 @@ func (p *AuthenticationInfo) GetAccessToken() (v string) {
 func (p *AuthenticationInfo) GetRefreshToken() (v string) {
 	return p.RefreshToken
 }
+
+func (p *AuthenticationInfo) GetMfaRequired() (v bool) {
+	return p.MfaRequired
+}
+
+func (p *AuthenticationInfo) GetMfaToken() (v string) {
+	return p.MfaToken
+}
 func (p *AuthenticationInfo) SetAccessToken(val string) {
 	p.AccessToken = val
 }
 func (p *AuthenticationInfo) SetRefreshToken(val string) {
 	p.RefreshToken = val
+}
+func (p *AuthenticationInfo) SetMfaRequired(val bool) {
+	p.MfaRequired = val
+}
+func (p *AuthenticationInfo) SetMfaToken(val string) {
+	p.MfaToken = val
 }
 
 func (p *AuthenticationInfo) String() string {
@@ -154,6 +170,8 @@ func (p *AuthenticationInfo) String() string {
 var fieldIDToName_AuthenticationInfo = map[int16]string{
 	1: "access_token",
 	2: "refresh_token",
+	3: "mfa_required",
+	4: "mfa_token",
 }
 
 type MFAInfo struct {

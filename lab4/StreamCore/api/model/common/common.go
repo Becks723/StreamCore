@@ -624,6 +624,8 @@ func (p *UserInfo) String() string {
 type AuthenticationInfo struct {
 	AccessToken  string `thrift:"access_token,1,required" form:"access_token,required" json:"access_token,required" query:"access_token,required"`
 	RefreshToken string `thrift:"refresh_token,2,required" form:"refresh_token,required" json:"refresh_token,required" query:"refresh_token,required"`
+	MfaRequired  bool   `thrift:"mfa_required,3,required" form:"mfa_required,required" json:"mfa_required,required" query:"mfa_required,required"`
+	MfaToken     string `thrift:"mfa_token,4,required" form:"mfa_token,required" json:"mfa_token,required" query:"mfa_token,required"`
 }
 
 func NewAuthenticationInfo() *AuthenticationInfo {
@@ -641,9 +643,19 @@ func (p *AuthenticationInfo) GetRefreshToken() (v string) {
 	return p.RefreshToken
 }
 
+func (p *AuthenticationInfo) GetMfaRequired() (v bool) {
+	return p.MfaRequired
+}
+
+func (p *AuthenticationInfo) GetMfaToken() (v string) {
+	return p.MfaToken
+}
+
 var fieldIDToName_AuthenticationInfo = map[int16]string{
 	1: "access_token",
 	2: "refresh_token",
+	3: "mfa_required",
+	4: "mfa_token",
 }
 
 func (p *AuthenticationInfo) Read(iprot thrift.TProtocol) (err error) {
@@ -652,6 +664,8 @@ func (p *AuthenticationInfo) Read(iprot thrift.TProtocol) (err error) {
 	var fieldId int16
 	var issetAccessToken bool = false
 	var issetRefreshToken bool = false
+	var issetMfaRequired bool = false
+	var issetMfaToken bool = false
 
 	if _, err = iprot.ReadStructBegin(); err != nil {
 		goto ReadStructBeginError
@@ -685,6 +699,24 @@ func (p *AuthenticationInfo) Read(iprot thrift.TProtocol) (err error) {
 			} else if err = iprot.Skip(fieldTypeId); err != nil {
 				goto SkipFieldError
 			}
+		case 3:
+			if fieldTypeId == thrift.BOOL {
+				if err = p.ReadField3(iprot); err != nil {
+					goto ReadFieldError
+				}
+				issetMfaRequired = true
+			} else if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		case 4:
+			if fieldTypeId == thrift.STRING {
+				if err = p.ReadField4(iprot); err != nil {
+					goto ReadFieldError
+				}
+				issetMfaToken = true
+			} else if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
 		default:
 			if err = iprot.Skip(fieldTypeId); err != nil {
 				goto SkipFieldError
@@ -705,6 +737,16 @@ func (p *AuthenticationInfo) Read(iprot thrift.TProtocol) (err error) {
 
 	if !issetRefreshToken {
 		fieldId = 2
+		goto RequiredFieldNotSetError
+	}
+
+	if !issetMfaRequired {
+		fieldId = 3
+		goto RequiredFieldNotSetError
+	}
+
+	if !issetMfaToken {
+		fieldId = 4
 		goto RequiredFieldNotSetError
 	}
 	return nil
@@ -747,6 +789,28 @@ func (p *AuthenticationInfo) ReadField2(iprot thrift.TProtocol) error {
 	p.RefreshToken = _field
 	return nil
 }
+func (p *AuthenticationInfo) ReadField3(iprot thrift.TProtocol) error {
+
+	var _field bool
+	if v, err := iprot.ReadBool(); err != nil {
+		return err
+	} else {
+		_field = v
+	}
+	p.MfaRequired = _field
+	return nil
+}
+func (p *AuthenticationInfo) ReadField4(iprot thrift.TProtocol) error {
+
+	var _field string
+	if v, err := iprot.ReadString(); err != nil {
+		return err
+	} else {
+		_field = v
+	}
+	p.MfaToken = _field
+	return nil
+}
 
 func (p *AuthenticationInfo) Write(oprot thrift.TProtocol) (err error) {
 	var fieldId int16
@@ -760,6 +824,14 @@ func (p *AuthenticationInfo) Write(oprot thrift.TProtocol) (err error) {
 		}
 		if err = p.writeField2(oprot); err != nil {
 			fieldId = 2
+			goto WriteFieldError
+		}
+		if err = p.writeField3(oprot); err != nil {
+			fieldId = 3
+			goto WriteFieldError
+		}
+		if err = p.writeField4(oprot); err != nil {
+			fieldId = 4
 			goto WriteFieldError
 		}
 	}
@@ -812,6 +884,40 @@ WriteFieldBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 2 begin error: ", p), err)
 WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 2 end error: ", p), err)
+}
+
+func (p *AuthenticationInfo) writeField3(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("mfa_required", thrift.BOOL, 3); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteBool(p.MfaRequired); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 3 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 3 end error: ", p), err)
+}
+
+func (p *AuthenticationInfo) writeField4(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("mfa_token", thrift.STRING, 4); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteString(p.MfaToken); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 4 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 4 end error: ", p), err)
 }
 
 func (p *AuthenticationInfo) String() string {

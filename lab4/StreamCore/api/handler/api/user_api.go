@@ -50,7 +50,6 @@ func Login(ctx context.Context, c *app.RequestContext) {
 	resp, err := rpc.LoginRPC(ctx, &user.LoginReq{
 		Username: req.Username,
 		Password: req.Password,
-		Code:     req.Code,
 	})
 	if err != nil {
 		pack.RespRPCError(c, err)
@@ -149,6 +148,31 @@ func MFABind(ctx context.Context, c *app.RequestContext) {
 	resp, err := rpc.MFABindRPC(ctx, &user.MFABindReq{
 		Code:   req.Code,
 		Secret: req.Secret,
+	})
+	if err != nil {
+		pack.RespRPCError(c, err)
+		return
+	}
+
+	if !pack.RespBizError(c, resp.Base) {
+		pack.RespSuccess(c)
+	}
+}
+
+// MFAVerify .
+// @router /auth/mfa/verify [POST]
+func MFAVerify(ctx context.Context, c *app.RequestContext) {
+	var err error
+	var req api.MFAVerifyReq
+	err = c.BindAndValidate(&req)
+	if err != nil {
+		pack.RespParamError(c, err)
+		return
+	}
+
+	resp, err := rpc.MFAVerifyRPC(ctx, &user.MFAVerifyReq{
+		MfaToken: req.MfaToken,
+		Code:     req.Code,
 	})
 	if err != nil {
 		pack.RespRPCError(c, err)

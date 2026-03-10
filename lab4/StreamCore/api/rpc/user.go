@@ -96,3 +96,16 @@ func MFABindRPC(ctx context.Context, req *user.MFABindReq) (*user.MFABindResp, e
 
 	return resp, nil
 }
+
+func MFAVerifyRPC(ctx context.Context, req *user.MFAVerifyReq) (*user.MFAVerifyResp, error) {
+	if userClient == nil {
+		return nil, errors.New("user rpc client not initialized")
+	}
+
+	resp, err := userClient.MFAVerify(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("mfa verify rpc call failed: %w", err)
+	}
+
+	return resp, nil
+}

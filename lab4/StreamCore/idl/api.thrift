@@ -14,6 +14,7 @@ service UserApi {
     user.AvatarResp    UploadAvatar(1: required user.AvatarReq req) (api.put="/user/avatar/upload")
     user.MFAQrcodeResp MFAQrcode(1: required user.MFAQrcodeReq req) (api.get="/auth/mfa/qrcode")
     user.MFABindResp   MFABind(1: required user.MFABindReq req) (api.post="/auth/mfa/bind")
+    user.MFAVerifyResp MFAVerify(1: required user.MFAVerifyReq req) (api.post="/auth/mfa/verify")
 }
 
 service VideoApi {
