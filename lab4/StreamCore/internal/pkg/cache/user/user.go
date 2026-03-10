@@ -13,8 +13,8 @@ import (
 type UserCache interface {
 	SetTOTPPending(ctx context.Context, uid uint, secret string, ttl time.Duration) error
 	GetTOTPPending(ctx context.Context, uid uint) (string, error)
-	MarkTOTPTimestep(ctx context.Context, uid uint) error
-	IsTOTPTimestepMarked(ctx context.Context, uid uint) (bool, error)
+	MarkTOTPTimestep(ctx context.Context, uid uint, code string, ttl time.Duration) error
+	IsTOTPTimestepMarked(ctx context.Context, uid uint, code string) (bool, error)
 	IncreaseTOTPFailure(ctx context.Context, uid uint, ttl time.Duration) error
 	TOTPFailureCount(ctx context.Context, uid uint) (int, error)
 	SetMFATokenUser(ctx context.Context, token string, uid uint, ttl time.Duration) error
@@ -37,20 +37,20 @@ func (c *usercache) GetTOTPPending(ctx context.Context, uid uint) (string, error
 	return c.rdb.Get(ctx, cacheKey).Result()
 }
 
-func (c *usercache) MarkTOTPTimestep(ctx context.Context, uid uint) error {
+func (c *usercache) MarkTOTPTimestep(ctx context.Context, uid uint, code string, ttl time.Duration) error {
 	timestep := time.Now().UnixMilli() / constants.TOTPInterval
-	key := c.totpPeriodKey(uid, timestep)
-	return c.rdb.Set(ctx, key, 1, constants.TOTPInterval*2*time.Second).Err()
+	key := c.totpTimestepKey(uid, timestep)
+	return c.rdb.Set(ctx, key, code, ttl).Err()
 }
 
-func (c *usercache) IsTOTPTimestepMarked(ctx context.Context, uid uint) (bool, error) {
+func (c *usercache) IsTOTPTimestepMarked(ctx context.Context, uid uint, code string) (bool, error) {
 	timestep := time.Now().UnixMilli() / constants.TOTPInterval
-	key := c.totpPeriodKey(uid, timestep)
-	ok, err := c.rdb.Exists(ctx, key).Result()
+	key := c.totpTimestepKey(uid, timestep)
+	cache, err := c.rdb.Get(ctx, key).Result()
 	if err != nil {
 		return false, err
 	}
-	return ok == 1, nil
+	return cache == code, nil
 }
 
 func (c *usercache) IncreaseTOTPFailure(ctx context.Context, uid uint, ttl time.Duration) error {
@@ -103,7 +103,7 @@ func (c *usercache) totpPendingKey(uid uint) string {
 	return fmt.Sprintf("totp:pending:%d", uid)
 }
 
-func (c *usercache) totpPeriodKey(uid uint, period int64) string {
+func (c *usercache) totpTimestepKey(uid uint, period int64) string {
 	return fmt.Sprintf("totp:replay:%d:%d", uid, period)
 }
 

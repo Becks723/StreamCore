@@ -68,7 +68,7 @@ func (s *UserService) totpAuth(uid uint, secret string, code string) (bool, erro
 	}
 	// 一致
 	// 检测重放攻击
-	replay, err := s.checkReplay(uid)
+	replay, err := s.checkReplay(uid, code)
 	if err != nil {
 		return false, err
 	}
@@ -79,8 +79,8 @@ func (s *UserService) totpAuth(uid uint, secret string, code string) (bool, erro
 }
 
 // checkReplay mfa防重放检测
-func (s *UserService) checkReplay(uid uint) (bool, error) {
-	marked, err := s.cache.IsTOTPTimestepMarked(s.ctx, uid)
+func (s *UserService) checkReplay(uid uint, code string) (bool, error) {
+	marked, err := s.cache.IsTOTPTimestepMarked(s.ctx, uid, code)
 	if err != nil {
 		return false, err
 	}
@@ -90,7 +90,7 @@ func (s *UserService) checkReplay(uid uint) (bool, error) {
 	}
 
 	// 标记该timestep，作为防重放的依据
-	err = s.cache.MarkTOTPTimestep(s.ctx, uid)
+	err = s.cache.MarkTOTPTimestep(s.ctx, uid, code, constants.TOTPInterval*time.Second) // ttl设置为一个timestep
 	if err != nil {
 		return false, err
 	}
