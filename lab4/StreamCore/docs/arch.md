@@ -21,7 +21,19 @@
 ![](img/arch_like.png)
 
 ## Bearer令牌
-鉴权部分使用 **双jwt** 的 bearer令牌模式。AccessToken负责实际的服务器鉴权，RefreshToken负责过时刷新。
+- 鉴权部分使用 **双jwt** 的 bearer令牌模式。访问令牌（AccessToken）负责访问资源，刷新令牌（RefreshToken）负责过时刷新。
+- 网关 api 的中间件会对包含在请求头传入的`Access-Token`解析并检查，接着将包含在令牌中的登录信息（目前仅有`uid`）包含进`context`上下文供下游的业务使用。
+- 访问令牌存活时间较短，当它寿命不足时，app应请求`/auth/refresh` 刷新访问令牌。
+  - 刷新操作也会生成一个新的 RefreshToken，以实现 RefreshToken 的 rotation，确保安全性。
+  - 刷新操作不一定要到访问令牌过期了才调，快过期了也可以调，这个没有那么严格。缺点是会短暂出现同时有两个访问令牌有效的情况，不过正因为其寿命较短，可忽略。
+  - 刷新的实现流程大致为：
+    1. 解析传入的 token，即现有的 RefreshToken
+       1. 解析失败，挂
+       2. 过期，挂
+    2. 解析出一个用户`uid`和令牌`tokenId`，服务器将`tokenId`和数据库中保存的进行比对，若不一致，挂
+    3. 自此解析完毕，说明令牌有效
+    4. 重新生成一个 access 和一个 refresh，注意生成 refresh的时候 `tokenId` 也要新生成，并存入db
+    5. 返回两个token
 
 ### 流程图
 ![](./img/arch_bearer.png)
