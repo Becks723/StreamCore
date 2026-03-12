@@ -2,12 +2,12 @@ package user
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
 
 	"StreamCore/internal/pkg/constants"
-	"errors"
 	"github.com/redis/go-redis/v9"
 )
 
