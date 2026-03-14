@@ -13,7 +13,8 @@
 - 链路追踪：jaeger
 - 可观测：grafana
 - CI/CD: Github Action
-- 
+- 单测：mockey + GoConvey
+
 # 项目结构
 ```txt
 .
@@ -93,10 +94,14 @@ make env-down
 ## 子模块架构
 见 [子模块架构](./docs/arch.md)。
 
+# 传送门
+- apifox接口文档：https://hhhb4f6wui.apifox.cn/
+- 单测踩坑和心得：[Golang 测试踩坑与心得](https://becks723.github.io/2026/03/14/golang%E6%B5%8B%E8%AF%95%E8%B8%A9%E5%9D%91/)
+
 # 不足 & 规划
 - http路由应统一加 `/api/v1` 前缀
 - swagger 文档
 - 自己应维护一套错误码系统 errno
 - 日志，包括业务中返回err太多，
-- 单测
-- 
+- 单测覆盖率
+- 参数校验不应耦合在业务逻辑中
