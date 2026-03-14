@@ -51,3 +51,10 @@ kitex-gen-%:
 .PHONY: hz-update-api
 hz-update-api:
 	@hz update --idl idl/api.thrift
+
+# 运行单元测试
+# -gcflags="all=-N -l" 表示禁用内联优化，否则 monkey patch 函数替换可能不成功
+.PHONY: test
+test:
+	@echo "$(PREFIX) Running go test..."; \
+	go test -gcflags="all=-N -l" -v ./...; \
