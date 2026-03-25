@@ -18,7 +18,7 @@ RUN mkdir -p /app/output
 WORKDIR /app
 
 # 拷贝所有文件到工作目录
-COPY .. .
+COPY . .
 # go mod依赖
 RUN go mod tidy
 

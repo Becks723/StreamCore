@@ -36,7 +36,7 @@
     5. 返回两个token
 
 ### 流程图
-![](./img/arch_bearer.png)
+![](img/arch_bearer.png)
 
 ## MFA架构
 多因素身份认证（MFA）使用了市面上较流行的 Time-based One-TIme Password（TOTP）模式。需配合第三方 Authenticator App 使用，如 Google Authenticator。
@@ -51,7 +51,7 @@
 
 ### 架构流程图
 绑定阶段
-![](./img/arch_totp_bind.png)
+![](img/arch_totp_bind.png)
 
 验证阶段
-![](./img/arch_totp_verify.png)
+![](img/arch_totp_verify.png)
