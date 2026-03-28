@@ -92,7 +92,7 @@ make env-down
 
 # 技术细节
 ## 子模块架构
-见 [子模块架构](docsrch.md)。
+见 [子模块架构](docs/arch.md)。
 
 # 传送门
 - apifox接口文档：https://hhhb4f6wui.apifox.cn/
