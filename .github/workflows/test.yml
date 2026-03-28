@@ -27,8 +27,6 @@ jobs:
 
       - name: Download Dependencies
         run: go mod tidy
-        working-directory: ./lab4/StreamCore
 
       - name: Run tests
         run: make test # MAKEFILE
-        working-directory: ./lab4/StreamCore

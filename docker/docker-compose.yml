@@ -7,7 +7,7 @@ services:
     ports:
       - "6379:6379"
     env_file:
-      - ./env/redis.env
+      - env/redis.env
     networks:
       - streamcore
 
@@ -21,7 +21,7 @@ services:
     ports:
       - "3306:3306"
     env_file:
-      - ./env/mysql.env
+      - env/mysql.env
     networks:
       - streamcore
 
@@ -37,7 +37,7 @@ services:
       - ../config:/config
       - ./data/etcd:/data/etcd
     env_file:
-      - ./env/etcd.env
+      - env/etcd.env
     networks:
       - streamcore
 

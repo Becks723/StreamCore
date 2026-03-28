@@ -21,4 +21,3 @@ jobs:
         uses: golangci/golangci-lint-action@v9
         with:
           version: latest
-          working-directory: ./lab4/StreamCore
