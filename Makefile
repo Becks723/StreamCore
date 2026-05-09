@@ -59,6 +59,18 @@ test:
 	@echo "$(PREFIX) Running go test..."; \
 	go test -gcflags="all=-N -l" -v ./...; \
 
+# 代码格式校验
+# --tests 包含*_test.go
+# --allow-parallel-runners 开启并行
+.PHONY: lint
+lint:
+	golangci-lint run \
+      --config=./.golangci.yml \
+      --tests \
+      --allow-parallel-runners \
+      --show-stats \
+      --verbose
+
 # 检查依赖漏洞
 .PHONY: vulncheck
 vulncheck:
