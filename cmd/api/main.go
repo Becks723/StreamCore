@@ -6,10 +6,12 @@ import (
 	"log"
 	"time"
 
+	apichat "StreamCore/api/chat"
 	"StreamCore/api/router"
 	"StreamCore/api/rpc"
 	"StreamCore/config"
 	"StreamCore/internal/pkg/base"
+	"StreamCore/internal/pkg/base/infra"
 	"StreamCore/internal/pkg/constants"
 	"StreamCore/pkg/util"
 	"context"
@@ -26,6 +28,12 @@ var (
 func init() {
 	config.Init(serviceName)
 	rpc.Init()
+
+	rdb, err := infra.InitRedis()
+	if err != nil {
+		log.Fatalf("%s InitRedis error: %v", logPrefix, err)
+	}
+	apichat.InitWSService(rdb)
 }
 
 func main() {

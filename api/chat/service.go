@@ -1,15 +1,20 @@
 package chat
 
 import (
-	"fmt"
+	"context"
+	"log"
 	"sync"
 
 	"github.com/bytedance/sonic"
 	"github.com/hertz-contrib/websocket"
+	"github.com/redis/go-redis/v9"
 )
 
+const wsPubSubChannel = "ws:push"
+
 type WSService struct {
-	hub *connectionHub
+	hub         *connectionHub
+	redisClient *redis.Client
 }
 
 var (
@@ -17,10 +22,18 @@ var (
 	wsServiceInst *WSService
 )
 
-func GlobalWSService() *WSService {
+func InitWSService(rdb *redis.Client) *WSService {
 	wsServiceOnce.Do(func() {
-		wsServiceInst = &WSService{hub: newConnectionHub()}
+		wsServiceInst = &WSService{
+			hub:         newConnectionHub(),
+			redisClient: rdb,
+		}
+		go wsServiceInst.listenRedisPubSub()
 	})
+	return wsServiceInst
+}
+
+func GlobalWSService() *WSService {
 	return wsServiceInst
 }
 
@@ -33,13 +46,41 @@ func (s *WSService) UnregisterClient(uid uint, conn *websocket.Conn) {
 }
 
 func (s *WSService) PushToUser(uid uint, msgType string, data any) error {
-	buf, err := sonic.Marshal(&MsgWrapper{Type: msgType, Data: mustMarshalRaw(data)})
+	buf, err := sonic.Marshal(&wsPubSubMsg{
+		UID:  uid,
+		Type: msgType,
+		Data: mustMarshalRaw(data),
+	})
 	if err != nil {
 		return err
 	}
+	return s.redisClient.Publish(context.Background(), wsPubSubChannel, buf).Err()
+}
+
+func (s *WSService) listenRedisPubSub() {
+	pubsub := s.redisClient.Subscribe(context.Background(), wsPubSubChannel)
+	defer pubsub.Close()
+
+	ch := pubsub.Channel()
+	for msg := range ch {
+		var m wsPubSubMsg
+		if err := sonic.Unmarshal([]byte(msg.Payload), &m); err != nil {
+			log.Printf("ws pubsub unmarshal failed: %v", err)
+			continue
+		}
+		s.pushToLocal(m.UID, m.Type, m.Data)
+	}
+}
+
+func (s *WSService) pushToLocal(uid uint, msgType string, data []byte) {
+	buf, err := sonic.Marshal(&MsgWrapper{Type: msgType, Data: data})
+	if err != nil {
+		log.Printf("ws marshal wrapper failed uid=%d: %v", uid, err)
+		return
+	}
 	conn, ok := s.hub.get(uid)
 	if !ok {
-		return nil
+		return
 	}
 	conn.writeMu.Lock()
 	defer conn.writeMu.Unlock()
@@ -47,9 +88,8 @@ func (s *WSService) PushToUser(uid uint, msgType string, data any) error {
 	if err = conn.conn.WriteMessage(websocket.TextMessage, buf); err != nil {
 		s.hub.unregister(uid, conn.conn)
 		_ = conn.conn.Close()
-		return fmt.Errorf("ws write failed uid=%d: %w", uid, err)
+		log.Printf("ws write failed uid=%d: %v", uid, err)
 	}
-	return nil
 }
 
 func mustMarshalRaw(v any) []byte {

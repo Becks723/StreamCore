@@ -50,6 +50,13 @@ type GroupServerMsg struct {
 	Timestamp int64  `json:"timestamp"`
 }
 
+// Redis Pub/Sub 跨实例消息传输
+type wsPubSubMsg struct {
+	UID  uint            `json:"uid"`
+	Type string          `json:"type"`
+	Data json.RawMessage `json:"data"`
+}
+
 // 新消息顶部提醒
 type NewMessageTip struct {
 	ConversationType string `json:"conversation_type"` // whisper/group
