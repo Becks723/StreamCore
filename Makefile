@@ -58,3 +58,8 @@ hz-update-api:
 test:
 	@echo "$(PREFIX) Running go test..."; \
 	go test -gcflags="all=-N -l" -v ./...; \
+
+# 检查依赖漏洞
+.PHONY: vulncheck
+vulncheck:
+	govulncheck ./...
