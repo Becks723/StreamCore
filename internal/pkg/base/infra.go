@@ -10,6 +10,7 @@ import (
 	"StreamCore/internal/pkg/constants"
 	"StreamCore/internal/pkg/db"
 	"StreamCore/internal/pkg/mq"
+	"StreamCore/kitex_gen/chat/chatservice"
 	"StreamCore/kitex_gen/group/groupservice"
 	"github.com/elastic/go-elasticsearch/v8"
 )
@@ -20,6 +21,7 @@ type InfraSet struct {
 	ES          *elasticsearch.TypedClient
 	MQ          *mq.MQSet
 	GroupClient groupservice.Client
+	ChatClient  chatservice.Client
 }
 
 var (
@@ -86,5 +88,15 @@ func WithGroupClient() Option {
 			log.Fatal(err)
 		}
 		s.GroupClient = *c
+	}
+}
+
+func WithChatClient() Option {
+	return func(s *InfraSet) {
+		c, err := rpc.InitRPCClient(constants.ChatServiceName, chatservice.NewClient)
+		if err != nil {
+			log.Fatal(err)
+		}
+		s.ChatClient = *c
 	}
 }

@@ -1,6 +1,7 @@
 package db
 
 import (
+	"StreamCore/internal/pkg/db/ai"
 	"StreamCore/internal/pkg/db/chat"
 	"StreamCore/internal/pkg/db/group"
 	ia "StreamCore/internal/pkg/db/interaction"
@@ -17,6 +18,7 @@ type DatabaseSet struct {
 	Social      social.SocialDatabase
 	Chat        chat.ChatDatabase
 	Group       group.GroupDatabase
+	AI          ai.AIDatabase
 }
 
 func NewDatabaseSet(orm *gorm.DB) *DatabaseSet {
@@ -27,5 +29,6 @@ func NewDatabaseSet(orm *gorm.DB) *DatabaseSet {
 		Social:      social.NewSocialDatabase(orm),
 		Chat:        chat.NewChatDatabase(orm),
 		Group:       group.NewGroupDatabase(orm),
+		AI:          ai.NewAIDatabase(orm),
 	}
 }

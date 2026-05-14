@@ -1,0 +1,25 @@
+package service
+
+import (
+	"context"
+
+	"StreamCore/internal/pkg/base"
+	"StreamCore/internal/pkg/db/ai"
+	"StreamCore/kitex_gen/chat/chatservice"
+)
+
+type AIService struct {
+	ctx        context.Context
+	db         ai.AIDatabase
+	infra      *base.InfraSet
+	chatClient chatservice.Client
+}
+
+func NewAIService(ctx context.Context, infra *base.InfraSet) *AIService {
+	return &AIService{
+		ctx:        ctx,
+		db:         infra.DB.AI,
+		infra:      infra,
+		chatClient: infra.ChatClient,
+	}
+}

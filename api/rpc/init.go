@@ -5,6 +5,7 @@ import (
 
 	"StreamCore/config"
 	"StreamCore/internal/pkg/constants"
+	"StreamCore/kitex_gen/ai/aiservice"
 	"StreamCore/kitex_gen/chat/chatservice"
 	"StreamCore/kitex_gen/group/groupservice"
 	"StreamCore/kitex_gen/interaction/interactionservice"
@@ -24,6 +25,7 @@ var (
 	socialClient socialservice.Client
 	chatClient   chatservice.Client
 	groupClient  groupservice.Client
+	aiClient     aiservice.Client
 )
 
 func Init() {
@@ -33,6 +35,7 @@ func Init() {
 	initInteractionRPC()
 	initChatRPC()
 	initGroupRPC()
+	initAIRPC()
 }
 
 func InitRPCClient[T any](serviceName string, newClientFunc func(string, ...client.Option) (T, error)) (*T, error) {

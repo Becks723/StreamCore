@@ -10,6 +10,7 @@ const (
 	SocialServiceName      = "social"
 	ChatServiceName        = "chat"
 	GroupServiceName       = "group"
+	AIServiceName          = "ai"
 
 	MaxConnections = 1000
 	MaxQPS         = 100
