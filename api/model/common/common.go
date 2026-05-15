@@ -2443,14 +2443,16 @@ type BotInfo struct {
 	Description string `thrift:"description,4,required" form:"description,required" json:"description,required" query:"description,required"`
 	// 人格/行为 Prompt
 	SystemPrompt string `thrift:"system_prompt,5,required" form:"system_prompt,required" json:"system_prompt,required" query:"system_prompt,required"`
-	// 模型标识
-	ModelName string `thrift:"model_name,6,required" form:"model_name,required" json:"model_name,required" query:"model_name,required"`
+	// 引用的 provider 名称
+	Provider string `thrift:"provider,6,required" form:"provider,required" json:"provider,required" query:"provider,required"`
+	// 可选覆盖 provider 的默认模型
+	ModelName *string `thrift:"model_name,7,optional" form:"model_name" json:"model_name,omitempty" query:"model_name"`
 	// 0: 仅 @提及触发，1: AI 自主判断（后期）
-	TriggerMode int32 `thrift:"trigger_mode,7,required" form:"trigger_mode,required" json:"trigger_mode,required" query:"trigger_mode,required"`
+	TriggerMode int32 `thrift:"trigger_mode,8,required" form:"trigger_mode,required" json:"trigger_mode,required" query:"trigger_mode,required"`
 	// 启用的 Tool ID 列表（全局 mcp_tools 的子集）
-	ToolIds   []string `thrift:"tool_ids,8,required,list<string>" form:"tool_ids,required" json:"tool_ids,required" query:"tool_ids,required"`
-	CreatedAt string   `thrift:"created_at,9,required" form:"created_at,required" json:"created_at,required" query:"created_at,required"`
-	UpdatedAt string   `thrift:"updated_at,10,required" form:"updated_at,required" json:"updated_at,required" query:"updated_at,required"`
+	ToolIds   []string `thrift:"tool_ids,9,required,list<string>" form:"tool_ids,required" json:"tool_ids,required" query:"tool_ids,required"`
+	CreatedAt string   `thrift:"created_at,10,required" form:"created_at,required" json:"created_at,required" query:"created_at,required"`
+	UpdatedAt string   `thrift:"updated_at,11,required" form:"updated_at,required" json:"updated_at,required" query:"updated_at,required"`
 }
 
 func NewBotInfo() *BotInfo {
@@ -2480,8 +2482,17 @@ func (p *BotInfo) GetSystemPrompt() (v string) {
 	return p.SystemPrompt
 }
 
+func (p *BotInfo) GetProvider() (v string) {
+	return p.Provider
+}
+
+var BotInfo_ModelName_DEFAULT string
+
 func (p *BotInfo) GetModelName() (v string) {
-	return p.ModelName
+	if !p.IsSetModelName() {
+		return BotInfo_ModelName_DEFAULT
+	}
+	return *p.ModelName
 }
 
 func (p *BotInfo) GetTriggerMode() (v int32) {
@@ -2506,11 +2517,16 @@ var fieldIDToName_BotInfo = map[int16]string{
 	3:  "avatar_url",
 	4:  "description",
 	5:  "system_prompt",
-	6:  "model_name",
-	7:  "trigger_mode",
-	8:  "tool_ids",
-	9:  "created_at",
-	10: "updated_at",
+	6:  "provider",
+	7:  "model_name",
+	8:  "trigger_mode",
+	9:  "tool_ids",
+	10: "created_at",
+	11: "updated_at",
+}
+
+func (p *BotInfo) IsSetModelName() bool {
+	return p.ModelName != nil
 }
 
 func (p *BotInfo) Read(iprot thrift.TProtocol) (err error) {
@@ -2522,7 +2538,7 @@ func (p *BotInfo) Read(iprot thrift.TProtocol) (err error) {
 	var issetAvatarURL bool = false
 	var issetDescription bool = false
 	var issetSystemPrompt bool = false
-	var issetModelName bool = false
+	var issetProvider bool = false
 	var issetTriggerMode bool = false
 	var issetToolIds bool = false
 	var issetCreatedAt bool = false
@@ -2592,40 +2608,48 @@ func (p *BotInfo) Read(iprot thrift.TProtocol) (err error) {
 				if err = p.ReadField6(iprot); err != nil {
 					goto ReadFieldError
 				}
-				issetModelName = true
+				issetProvider = true
 			} else if err = iprot.Skip(fieldTypeId); err != nil {
 				goto SkipFieldError
 			}
 		case 7:
-			if fieldTypeId == thrift.I32 {
+			if fieldTypeId == thrift.STRING {
 				if err = p.ReadField7(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		case 8:
+			if fieldTypeId == thrift.I32 {
+				if err = p.ReadField8(iprot); err != nil {
 					goto ReadFieldError
 				}
 				issetTriggerMode = true
 			} else if err = iprot.Skip(fieldTypeId); err != nil {
 				goto SkipFieldError
 			}
-		case 8:
+		case 9:
 			if fieldTypeId == thrift.LIST {
-				if err = p.ReadField8(iprot); err != nil {
+				if err = p.ReadField9(iprot); err != nil {
 					goto ReadFieldError
 				}
 				issetToolIds = true
 			} else if err = iprot.Skip(fieldTypeId); err != nil {
 				goto SkipFieldError
 			}
-		case 9:
+		case 10:
 			if fieldTypeId == thrift.STRING {
-				if err = p.ReadField9(iprot); err != nil {
+				if err = p.ReadField10(iprot); err != nil {
 					goto ReadFieldError
 				}
 				issetCreatedAt = true
 			} else if err = iprot.Skip(fieldTypeId); err != nil {
 				goto SkipFieldError
 			}
-		case 10:
+		case 11:
 			if fieldTypeId == thrift.STRING {
-				if err = p.ReadField10(iprot); err != nil {
+				if err = p.ReadField11(iprot); err != nil {
 					goto ReadFieldError
 				}
 				issetUpdatedAt = true
@@ -2670,28 +2694,28 @@ func (p *BotInfo) Read(iprot thrift.TProtocol) (err error) {
 		goto RequiredFieldNotSetError
 	}
 
-	if !issetModelName {
+	if !issetProvider {
 		fieldId = 6
 		goto RequiredFieldNotSetError
 	}
 
 	if !issetTriggerMode {
-		fieldId = 7
-		goto RequiredFieldNotSetError
-	}
-
-	if !issetToolIds {
 		fieldId = 8
 		goto RequiredFieldNotSetError
 	}
 
-	if !issetCreatedAt {
+	if !issetToolIds {
 		fieldId = 9
 		goto RequiredFieldNotSetError
 	}
 
-	if !issetUpdatedAt {
+	if !issetCreatedAt {
 		fieldId = 10
+		goto RequiredFieldNotSetError
+	}
+
+	if !issetUpdatedAt {
+		fieldId = 11
 		goto RequiredFieldNotSetError
 	}
 	return nil
@@ -2775,10 +2799,21 @@ func (p *BotInfo) ReadField6(iprot thrift.TProtocol) error {
 	} else {
 		_field = v
 	}
-	p.ModelName = _field
+	p.Provider = _field
 	return nil
 }
 func (p *BotInfo) ReadField7(iprot thrift.TProtocol) error {
+
+	var _field *string
+	if v, err := iprot.ReadString(); err != nil {
+		return err
+	} else {
+		_field = &v
+	}
+	p.ModelName = _field
+	return nil
+}
+func (p *BotInfo) ReadField8(iprot thrift.TProtocol) error {
 
 	var _field int32
 	if v, err := iprot.ReadI32(); err != nil {
@@ -2789,7 +2824,7 @@ func (p *BotInfo) ReadField7(iprot thrift.TProtocol) error {
 	p.TriggerMode = _field
 	return nil
 }
-func (p *BotInfo) ReadField8(iprot thrift.TProtocol) error {
+func (p *BotInfo) ReadField9(iprot thrift.TProtocol) error {
 	_, size, err := iprot.ReadListBegin()
 	if err != nil {
 		return err
@@ -2812,7 +2847,7 @@ func (p *BotInfo) ReadField8(iprot thrift.TProtocol) error {
 	p.ToolIds = _field
 	return nil
 }
-func (p *BotInfo) ReadField9(iprot thrift.TProtocol) error {
+func (p *BotInfo) ReadField10(iprot thrift.TProtocol) error {
 
 	var _field string
 	if v, err := iprot.ReadString(); err != nil {
@@ -2823,7 +2858,7 @@ func (p *BotInfo) ReadField9(iprot thrift.TProtocol) error {
 	p.CreatedAt = _field
 	return nil
 }
-func (p *BotInfo) ReadField10(iprot thrift.TProtocol) error {
+func (p *BotInfo) ReadField11(iprot thrift.TProtocol) error {
 
 	var _field string
 	if v, err := iprot.ReadString(); err != nil {
@@ -2879,6 +2914,10 @@ func (p *BotInfo) Write(oprot thrift.TProtocol) (err error) {
 		}
 		if err = p.writeField10(oprot); err != nil {
 			fieldId = 10
+			goto WriteFieldError
+		}
+		if err = p.writeField11(oprot); err != nil {
+			fieldId = 11
 			goto WriteFieldError
 		}
 	}
@@ -2985,10 +3024,10 @@ WriteFieldEndError:
 }
 
 func (p *BotInfo) writeField6(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("model_name", thrift.STRING, 6); err != nil {
+	if err = oprot.WriteFieldBegin("provider", thrift.STRING, 6); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteString(p.ModelName); err != nil {
+	if err := oprot.WriteString(p.Provider); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -3002,7 +3041,26 @@ WriteFieldEndError:
 }
 
 func (p *BotInfo) writeField7(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("trigger_mode", thrift.I32, 7); err != nil {
+	if p.IsSetModelName() {
+		if err = oprot.WriteFieldBegin("model_name", thrift.STRING, 7); err != nil {
+			goto WriteFieldBeginError
+		}
+		if err := oprot.WriteString(*p.ModelName); err != nil {
+			return err
+		}
+		if err = oprot.WriteFieldEnd(); err != nil {
+			goto WriteFieldEndError
+		}
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 7 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 7 end error: ", p), err)
+}
+
+func (p *BotInfo) writeField8(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("trigger_mode", thrift.I32, 8); err != nil {
 		goto WriteFieldBeginError
 	}
 	if err := oprot.WriteI32(p.TriggerMode); err != nil {
@@ -3013,13 +3071,13 @@ func (p *BotInfo) writeField7(oprot thrift.TProtocol) (err error) {
 	}
 	return nil
 WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 7 begin error: ", p), err)
+	return thrift.PrependError(fmt.Sprintf("%T write field 8 begin error: ", p), err)
 WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 7 end error: ", p), err)
+	return thrift.PrependError(fmt.Sprintf("%T write field 8 end error: ", p), err)
 }
 
-func (p *BotInfo) writeField8(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("tool_ids", thrift.LIST, 8); err != nil {
+func (p *BotInfo) writeField9(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("tool_ids", thrift.LIST, 9); err != nil {
 		goto WriteFieldBeginError
 	}
 	if err := oprot.WriteListBegin(thrift.STRING, len(p.ToolIds)); err != nil {
@@ -3038,13 +3096,13 @@ func (p *BotInfo) writeField8(oprot thrift.TProtocol) (err error) {
 	}
 	return nil
 WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 8 begin error: ", p), err)
+	return thrift.PrependError(fmt.Sprintf("%T write field 9 begin error: ", p), err)
 WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 8 end error: ", p), err)
+	return thrift.PrependError(fmt.Sprintf("%T write field 9 end error: ", p), err)
 }
 
-func (p *BotInfo) writeField9(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("created_at", thrift.STRING, 9); err != nil {
+func (p *BotInfo) writeField10(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("created_at", thrift.STRING, 10); err != nil {
 		goto WriteFieldBeginError
 	}
 	if err := oprot.WriteString(p.CreatedAt); err != nil {
@@ -3055,13 +3113,13 @@ func (p *BotInfo) writeField9(oprot thrift.TProtocol) (err error) {
 	}
 	return nil
 WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 9 begin error: ", p), err)
+	return thrift.PrependError(fmt.Sprintf("%T write field 10 begin error: ", p), err)
 WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 9 end error: ", p), err)
+	return thrift.PrependError(fmt.Sprintf("%T write field 10 end error: ", p), err)
 }
 
-func (p *BotInfo) writeField10(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("updated_at", thrift.STRING, 10); err != nil {
+func (p *BotInfo) writeField11(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("updated_at", thrift.STRING, 11); err != nil {
 		goto WriteFieldBeginError
 	}
 	if err := oprot.WriteString(p.UpdatedAt); err != nil {
@@ -3072,9 +3130,9 @@ func (p *BotInfo) writeField10(oprot thrift.TProtocol) (err error) {
 	}
 	return nil
 WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 10 begin error: ", p), err)
+	return thrift.PrependError(fmt.Sprintf("%T write field 11 begin error: ", p), err)
 WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 10 end error: ", p), err)
+	return thrift.PrependError(fmt.Sprintf("%T write field 11 end error: ", p), err)
 }
 
 func (p *BotInfo) String() string {
