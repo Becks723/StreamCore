@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	"StreamCore/internal/pkg/ai/agent"
 	"StreamCore/internal/pkg/base"
 	"StreamCore/internal/pkg/db/ai"
 	"StreamCore/kitex_gen/chat/chatservice"
@@ -13,13 +14,15 @@ type AIService struct {
 	db         ai.AIDatabase
 	infra      *base.InfraSet
 	chatClient chatservice.Client
+	agent      *agent.Agent
 }
 
-func NewAIService(ctx context.Context, infra *base.InfraSet) *AIService {
+func NewAIService(ctx context.Context, infra *base.InfraSet, ag *agent.Agent) *AIService {
 	return &AIService{
 		ctx:        ctx,
 		db:         infra.DB.AI,
 		infra:      infra,
 		chatClient: infra.ChatClient,
+		agent:      ag,
 	}
 }
