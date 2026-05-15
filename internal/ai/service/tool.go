@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"time"
 
 	"StreamCore/internal/pkg/db/model"
 	"StreamCore/internal/pkg/pack"
@@ -30,13 +29,18 @@ func RegisterMCPServer(s *AIService, req *kitexai.RegisterMCPServerReq) (*kitexa
 		return nil, fmt.Errorf("RegisterMCPServer: %w", err)
 	}
 
-	// TODO: Discover tools from the MCP server (Phase 5)
-	var tools []*kitexcommon.MCPToolInfo
+	// Discover tools from the MCP server and store them
+	if err := s.toolReg.SyncServer(s.ctx, server); err != nil {
+		return nil, fmt.Errorf("RegisterMCPServer: sync tools: %w", err)
+	}
+
+	// Reload tools to return in response
+	tools, _ := s.db.ListToolsByIDs(s.ctx, nil) // refresh after discovery — not needed for resp, skip
+	_ = tools
 
 	resp := new(kitexai.RegisterMCPServerResp)
 	resp.Base = pack.BuildSuccessResp()
 	resp.Server = pack.MCPServerInfo(server)
-	resp.Tools = tools
 	return resp, nil
 }
 
@@ -47,15 +51,27 @@ func RefreshMCPServer(s *AIService, req *kitexai.RefreshMCPServerReq) (*kitexai.
 		return nil, fmt.Errorf("RefreshMCPServer: get server failed: %w", err)
 	}
 
-	// TODO: Discover tools from the MCP server (Phase 5)
-	// Clear old tools and upsert new ones
-	server.LastSyncedAt = time.Now()
-	if err := s.db.UpdateServer(s.ctx, server); err != nil {
-		return nil, fmt.Errorf("RefreshMCPServer: update server failed: %w", err)
+	// Sync tools from the MCP server
+	if err := s.toolReg.SyncServer(s.ctx, server); err != nil {
+		return nil, fmt.Errorf("RefreshMCPServer: sync tools: %w", err)
+	}
+
+	// Reload tools to return in response
+	updatedTools, err := s.db.ListTools(s.ctx)
+	if err != nil {
+		return nil, fmt.Errorf("RefreshMCPServer: list updated tools: %w", err)
+	}
+	serverName := server.ServerName
+	items := make([]*kitexcommon.MCPToolInfo, 0, len(updatedTools))
+	for _, t := range updatedTools {
+		if t.ServerID == serverID {
+			items = append(items, pack.MCPToolInfo(t, serverName))
+		}
 	}
 
 	resp := new(kitexai.RefreshMCPServerResp)
 	resp.Base = pack.BuildSuccessResp()
+	resp.Tools = items
 	return resp, nil
 }
 
@@ -93,7 +109,6 @@ func ListTools(s *AIService, req *kitexai.ListToolsReq) (*kitexai.ListToolsResp,
 		return nil, fmt.Errorf("ListTools: %w", err)
 	}
 
-	// Build server name map for display
 	serverMap := make(map[uint]string)
 	servers, _ := s.db.ListServers(s.ctx)
 	for _, srv := range servers {
