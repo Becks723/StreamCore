@@ -13,7 +13,8 @@ import (
 // BotConfigData is used for JSON serialization of bot_config.
 type BotConfigData struct {
 	SystemPrompt string   `json:"system_prompt"`
-	ModelName    string   `json:"model_name"`
+	Provider     string   `json:"provider"`   // references provider.name in config
+	ModelName    string   `json:"model_name"` // optional, overrides provider's default_model
 	TriggerMode  int32    `json:"trigger_mode"`
 	ToolIDs      []string `json:"tool_ids"`
 }

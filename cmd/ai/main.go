@@ -6,6 +6,7 @@ import (
 
 	"StreamCore/config"
 	aiimpl "StreamCore/internal/ai"
+	"StreamCore/internal/pkg/ai/provider"
 	"StreamCore/internal/pkg/base"
 	"StreamCore/internal/pkg/constants"
 	"StreamCore/kitex_gen/ai/aiservice"
@@ -24,6 +25,7 @@ var (
 
 func init() {
 	config.Init(serviceName)
+	provider.Init()
 	infra = base.GetInfraSet(
 		base.WithDB(),
 		base.WithCache(),
