@@ -14,7 +14,7 @@ type BotGroupModel struct {
 // MCPServerModel represents a registered MCP server.
 type MCPServerModel struct {
 	ID              uint   `gorm:"primaryKey"`
-	ServerName      string `gorm:"uniqueIndex"`
+	ServerName      string `gorm:"size:128;uniqueIndex"`
 	ServerURL       string
 	AuthToken       string
 	SyncIntervalSec int `gorm:"default:300"`
@@ -27,7 +27,7 @@ type MCPServerModel struct {
 // MCPToolModel represents a tool discovered from an MCP server.
 type MCPToolModel struct {
 	ID          uint   `gorm:"primaryKey"`
-	ToolID      string `gorm:"uniqueIndex"`
+	ToolID      string `gorm:"size:255;uniqueIndex"`
 	ToolName    string
 	Description string
 	InputSchema string `gorm:"type:text"` // JSON Schema
@@ -40,7 +40,7 @@ type MCPToolModel struct {
 type CredentialModel struct {
 	ID          uint   `gorm:"primaryKey"`
 	UserID      uint   `gorm:"uniqueIndex:idx_user_service"`
-	ServiceName string `gorm:"uniqueIndex:idx_user_service"`
+	ServiceName string `gorm:"size:64;uniqueIndex:idx_user_service"`
 	Username    string
 	Password    string // AES-256-GCM encrypted
 	CreatedAt   time.Time

@@ -159,11 +159,12 @@ var fieldIDToName_ProcessMessageResp = map[int16]string{
 type CreateBotReq struct {
 	BotName      string   `thrift:"bot_name,1,required" frugal:"1,required,string" json:"bot_name"`
 	SystemPrompt string   `thrift:"system_prompt,2,required" frugal:"2,required,string" json:"system_prompt"`
-	ModelName    string   `thrift:"model_name,3,required" frugal:"3,required,string" json:"model_name"`
-	TriggerMode  int32    `thrift:"trigger_mode,4,required" frugal:"4,required,i32" json:"trigger_mode"`
-	Description  *string  `thrift:"description,5,optional" frugal:"5,optional,string" json:"description,omitempty"`
-	AvatarUrl    *string  `thrift:"avatar_url,6,optional" frugal:"6,optional,string" json:"avatar_url,omitempty"`
-	ToolIds      []string `thrift:"tool_ids,7,optional" frugal:"7,optional,list<string>" json:"tool_ids,omitempty"`
+	Provider     string   `thrift:"provider,3,required" frugal:"3,required,string" json:"provider"`
+	ModelName    *string  `thrift:"model_name,4,optional" frugal:"4,optional,string" json:"model_name,omitempty"`
+	TriggerMode  int32    `thrift:"trigger_mode,5,required" frugal:"5,required,i32" json:"trigger_mode"`
+	Description  *string  `thrift:"description,6,optional" frugal:"6,optional,string" json:"description,omitempty"`
+	AvatarUrl    *string  `thrift:"avatar_url,7,optional" frugal:"7,optional,string" json:"avatar_url,omitempty"`
+	ToolIds      []string `thrift:"tool_ids,8,optional" frugal:"8,optional,list<string>" json:"tool_ids,omitempty"`
 }
 
 func NewCreateBotReq() *CreateBotReq {
@@ -181,8 +182,17 @@ func (p *CreateBotReq) GetSystemPrompt() (v string) {
 	return p.SystemPrompt
 }
 
+func (p *CreateBotReq) GetProvider() (v string) {
+	return p.Provider
+}
+
+var CreateBotReq_ModelName_DEFAULT string
+
 func (p *CreateBotReq) GetModelName() (v string) {
-	return p.ModelName
+	if !p.IsSetModelName() {
+		return CreateBotReq_ModelName_DEFAULT
+	}
+	return *p.ModelName
 }
 
 func (p *CreateBotReq) GetTriggerMode() (v int32) {
@@ -221,7 +231,10 @@ func (p *CreateBotReq) SetBotName(val string) {
 func (p *CreateBotReq) SetSystemPrompt(val string) {
 	p.SystemPrompt = val
 }
-func (p *CreateBotReq) SetModelName(val string) {
+func (p *CreateBotReq) SetProvider(val string) {
+	p.Provider = val
+}
+func (p *CreateBotReq) SetModelName(val *string) {
 	p.ModelName = val
 }
 func (p *CreateBotReq) SetTriggerMode(val int32) {
@@ -235,6 +248,10 @@ func (p *CreateBotReq) SetAvatarUrl(val *string) {
 }
 func (p *CreateBotReq) SetToolIds(val []string) {
 	p.ToolIds = val
+}
+
+func (p *CreateBotReq) IsSetModelName() bool {
+	return p.ModelName != nil
 }
 
 func (p *CreateBotReq) IsSetDescription() bool {
@@ -259,11 +276,12 @@ func (p *CreateBotReq) String() string {
 var fieldIDToName_CreateBotReq = map[int16]string{
 	1: "bot_name",
 	2: "system_prompt",
-	3: "model_name",
-	4: "trigger_mode",
-	5: "description",
-	6: "avatar_url",
-	7: "tool_ids",
+	3: "provider",
+	4: "model_name",
+	5: "trigger_mode",
+	6: "description",
+	7: "avatar_url",
+	8: "tool_ids",
 }
 
 type CreateBotResp struct {
@@ -326,11 +344,12 @@ type UpdateBotReq struct {
 	BotId        string   `thrift:"bot_id,1,required" frugal:"1,required,string" json:"bot_id"`
 	BotName      *string  `thrift:"bot_name,2,optional" frugal:"2,optional,string" json:"bot_name,omitempty"`
 	SystemPrompt *string  `thrift:"system_prompt,3,optional" frugal:"3,optional,string" json:"system_prompt,omitempty"`
-	ModelName    *string  `thrift:"model_name,4,optional" frugal:"4,optional,string" json:"model_name,omitempty"`
-	TriggerMode  *int32   `thrift:"trigger_mode,5,optional" frugal:"5,optional,i32" json:"trigger_mode,omitempty"`
-	Description  *string  `thrift:"description,6,optional" frugal:"6,optional,string" json:"description,omitempty"`
-	AvatarUrl    *string  `thrift:"avatar_url,7,optional" frugal:"7,optional,string" json:"avatar_url,omitempty"`
-	ToolIds      []string `thrift:"tool_ids,8,optional" frugal:"8,optional,list<string>" json:"tool_ids,omitempty"`
+	Provider     *string  `thrift:"provider,4,optional" frugal:"4,optional,string" json:"provider,omitempty"`
+	ModelName    *string  `thrift:"model_name,5,optional" frugal:"5,optional,string" json:"model_name,omitempty"`
+	TriggerMode  *int32   `thrift:"trigger_mode,6,optional" frugal:"6,optional,i32" json:"trigger_mode,omitempty"`
+	Description  *string  `thrift:"description,7,optional" frugal:"7,optional,string" json:"description,omitempty"`
+	AvatarUrl    *string  `thrift:"avatar_url,8,optional" frugal:"8,optional,string" json:"avatar_url,omitempty"`
+	ToolIds      []string `thrift:"tool_ids,9,optional" frugal:"9,optional,list<string>" json:"tool_ids,omitempty"`
 }
 
 func NewUpdateBotReq() *UpdateBotReq {
@@ -360,6 +379,15 @@ func (p *UpdateBotReq) GetSystemPrompt() (v string) {
 		return UpdateBotReq_SystemPrompt_DEFAULT
 	}
 	return *p.SystemPrompt
+}
+
+var UpdateBotReq_Provider_DEFAULT string
+
+func (p *UpdateBotReq) GetProvider() (v string) {
+	if !p.IsSetProvider() {
+		return UpdateBotReq_Provider_DEFAULT
+	}
+	return *p.Provider
 }
 
 var UpdateBotReq_ModelName_DEFAULT string
@@ -415,6 +443,9 @@ func (p *UpdateBotReq) SetBotName(val *string) {
 func (p *UpdateBotReq) SetSystemPrompt(val *string) {
 	p.SystemPrompt = val
 }
+func (p *UpdateBotReq) SetProvider(val *string) {
+	p.Provider = val
+}
 func (p *UpdateBotReq) SetModelName(val *string) {
 	p.ModelName = val
 }
@@ -437,6 +468,10 @@ func (p *UpdateBotReq) IsSetBotName() bool {
 
 func (p *UpdateBotReq) IsSetSystemPrompt() bool {
 	return p.SystemPrompt != nil
+}
+
+func (p *UpdateBotReq) IsSetProvider() bool {
+	return p.Provider != nil
 }
 
 func (p *UpdateBotReq) IsSetModelName() bool {
@@ -470,11 +505,12 @@ var fieldIDToName_UpdateBotReq = map[int16]string{
 	1: "bot_id",
 	2: "bot_name",
 	3: "system_prompt",
-	4: "model_name",
-	5: "trigger_mode",
-	6: "description",
-	7: "avatar_url",
-	8: "tool_ids",
+	4: "provider",
+	5: "model_name",
+	6: "trigger_mode",
+	7: "description",
+	8: "avatar_url",
+	9: "tool_ids",
 }
 
 type UpdateBotResp struct {

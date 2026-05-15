@@ -59,11 +59,12 @@ struct BotInfo {
     3: required string avatar_url       // 头像
     4: required string description      // 一句话描述
     5: required string system_prompt    // 人格/行为 Prompt
-    6: required string model_name       // 模型标识
-    7: required i32 trigger_mode        // 0: 仅 @提及触发，1: AI 自主判断（后期）
-    8: required list<string> tool_ids   // 启用的 Tool ID 列表（全局 mcp_tools 的子集）
-    9: required string created_at
-    10: required string updated_at
+    6: required string provider         // 引用的 provider 名称
+    7: optional string model_name       // 可选覆盖 provider 的默认模型
+    8: required i32 trigger_mode        // 0: 仅 @提及触发，1: AI 自主判断（后期）
+    9: required list<string> tool_ids   // 启用的 Tool ID 列表（全局 mcp_tools 的子集）
+    10: required string created_at
+    11: required string updated_at
 }
 
 struct MCPToolInfo {

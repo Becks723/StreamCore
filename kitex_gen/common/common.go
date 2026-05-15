@@ -447,11 +447,12 @@ type BotInfo struct {
 	AvatarUrl    string   `thrift:"avatar_url,3,required" frugal:"3,required,string" json:"avatar_url"`
 	Description  string   `thrift:"description,4,required" frugal:"4,required,string" json:"description"`
 	SystemPrompt string   `thrift:"system_prompt,5,required" frugal:"5,required,string" json:"system_prompt"`
-	ModelName    string   `thrift:"model_name,6,required" frugal:"6,required,string" json:"model_name"`
-	TriggerMode  int32    `thrift:"trigger_mode,7,required" frugal:"7,required,i32" json:"trigger_mode"`
-	ToolIds      []string `thrift:"tool_ids,8,required" frugal:"8,required,list<string>" json:"tool_ids"`
-	CreatedAt    string   `thrift:"created_at,9,required" frugal:"9,required,string" json:"created_at"`
-	UpdatedAt    string   `thrift:"updated_at,10,required" frugal:"10,required,string" json:"updated_at"`
+	Provider     string   `thrift:"provider,6,required" frugal:"6,required,string" json:"provider"`
+	ModelName    *string  `thrift:"model_name,7,optional" frugal:"7,optional,string" json:"model_name,omitempty"`
+	TriggerMode  int32    `thrift:"trigger_mode,8,required" frugal:"8,required,i32" json:"trigger_mode"`
+	ToolIds      []string `thrift:"tool_ids,9,required" frugal:"9,required,list<string>" json:"tool_ids"`
+	CreatedAt    string   `thrift:"created_at,10,required" frugal:"10,required,string" json:"created_at"`
+	UpdatedAt    string   `thrift:"updated_at,11,required" frugal:"11,required,string" json:"updated_at"`
 }
 
 func NewBotInfo() *BotInfo {
@@ -481,8 +482,17 @@ func (p *BotInfo) GetSystemPrompt() (v string) {
 	return p.SystemPrompt
 }
 
+func (p *BotInfo) GetProvider() (v string) {
+	return p.Provider
+}
+
+var BotInfo_ModelName_DEFAULT string
+
 func (p *BotInfo) GetModelName() (v string) {
-	return p.ModelName
+	if !p.IsSetModelName() {
+		return BotInfo_ModelName_DEFAULT
+	}
+	return *p.ModelName
 }
 
 func (p *BotInfo) GetTriggerMode() (v int32) {
@@ -515,7 +525,10 @@ func (p *BotInfo) SetDescription(val string) {
 func (p *BotInfo) SetSystemPrompt(val string) {
 	p.SystemPrompt = val
 }
-func (p *BotInfo) SetModelName(val string) {
+func (p *BotInfo) SetProvider(val string) {
+	p.Provider = val
+}
+func (p *BotInfo) SetModelName(val *string) {
 	p.ModelName = val
 }
 func (p *BotInfo) SetTriggerMode(val int32) {
@@ -531,6 +544,10 @@ func (p *BotInfo) SetUpdatedAt(val string) {
 	p.UpdatedAt = val
 }
 
+func (p *BotInfo) IsSetModelName() bool {
+	return p.ModelName != nil
+}
+
 func (p *BotInfo) String() string {
 	if p == nil {
 		return "<nil>"
@@ -544,11 +561,12 @@ var fieldIDToName_BotInfo = map[int16]string{
 	3:  "avatar_url",
 	4:  "description",
 	5:  "system_prompt",
-	6:  "model_name",
-	7:  "trigger_mode",
-	8:  "tool_ids",
-	9:  "created_at",
-	10: "updated_at",
+	6:  "provider",
+	7:  "model_name",
+	8:  "trigger_mode",
+	9:  "tool_ids",
+	10: "created_at",
+	11: "updated_at",
 }
 
 type MCPToolInfo struct {

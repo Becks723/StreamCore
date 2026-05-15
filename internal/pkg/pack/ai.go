@@ -47,18 +47,22 @@ func ParseBotConfig(raw string) *BotConfigData {
 // BotInfo converts a UserModel (is_bot=1) to thrift BotInfo.
 func BotInfo(user *model.UserModel) *kitexcommon.BotInfo {
 	cfg := ParseBotConfig(user.BotConfig)
-	return &kitexcommon.BotInfo{
+	info := &kitexcommon.BotInfo{
 		BotId:        util.Uint2String(user.ID),
 		BotName:      user.Username,
 		AvatarUrl:    user.AvatarUrl,
 		Description:  "", // UserModel doesn't have a description field
 		SystemPrompt: cfg.SystemPrompt,
-		ModelName:    cfg.ModelName,
+		Provider:     cfg.Provider,
 		TriggerMode:  cfg.TriggerMode,
 		ToolIds:      cfg.ToolIDs,
 		CreatedAt:    user.CreatedAt.Format(time.DateTime),
 		UpdatedAt:    user.UpdatedAt.Format(time.DateTime),
 	}
+	if cfg.ModelName != "" {
+		info.ModelName = util.StringPtr(cfg.ModelName)
+	}
+	return info
 }
 
 // MCPToolInfo converts MCPToolModel to thrift MCPToolInfo.

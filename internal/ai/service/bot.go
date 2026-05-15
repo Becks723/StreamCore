@@ -13,15 +13,20 @@ import (
 
 func CreateBot(s *AIService, req *kitexai.CreateBotReq) (*kitexai.CreateBotResp, error) {
 	// Create a user record for the bot
+	cfg := &pack.BotConfigData{
+		SystemPrompt: req.GetSystemPrompt(),
+		Provider:     req.GetProvider(),
+		TriggerMode:  req.GetTriggerMode(),
+		ToolIDs:      req.GetToolIds(),
+	}
+	if req.IsSetModelName() {
+		cfg.ModelName = req.GetModelName()
+	}
+
 	bot := &model.UserModel{
-		Username: req.GetBotName(),
-		IsBot:    true,
-		BotConfig: pack.BotConfigToJSON(&pack.BotConfigData{
-			SystemPrompt: req.GetSystemPrompt(),
-			ModelName:    req.GetModelName(),
-			TriggerMode:  req.GetTriggerMode(),
-			ToolIDs:      req.GetToolIds(),
-		}),
+		Username:  req.GetBotName(),
+		IsBot:     true,
+		BotConfig: pack.BotConfigToJSON(cfg),
 	}
 
 	if err := s.db.CreateBotUser(s.ctx, bot); err != nil {
@@ -53,6 +58,9 @@ func UpdateBot(s *AIService, req *kitexai.UpdateBotReq) (*kitexai.UpdateBotResp,
 	}
 	if req.IsSetSystemPrompt() {
 		cfg.SystemPrompt = req.GetSystemPrompt()
+	}
+	if req.IsSetProvider() {
+		cfg.Provider = req.GetProvider()
 	}
 	if req.IsSetModelName() {
 		cfg.ModelName = req.GetModelName()

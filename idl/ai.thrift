@@ -24,11 +24,12 @@ struct ProcessMessageResp {
 struct CreateBotReq {
     1: required string bot_name
     2: required string system_prompt
-    3: required string model_name
-    4: required i32 trigger_mode        // 0: mention（第一期只支持 0）
-    5: optional string description
-    6: optional string avatar_url
-    7: optional list<string> tool_ids
+    3: required string provider         // 引用的 provider 名称（对应 config.yaml providers.name）
+    4: optional string model_name       // 可选覆盖 provider 的默认模型
+    5: required i32 trigger_mode        // 0: mention（第一期只支持 0）
+    6: optional string description
+    7: optional string avatar_url
+    8: optional list<string> tool_ids
 }
 
 struct CreateBotResp {
@@ -40,11 +41,12 @@ struct UpdateBotReq {
     1: required string bot_id
     2: optional string bot_name
     3: optional string system_prompt
-    4: optional string model_name
-    5: optional i32 trigger_mode
-    6: optional string description
-    7: optional string avatar_url
-    8: optional list<string> tool_ids
+    4: optional string provider         // 切换 provider
+    5: optional string model_name       // 覆盖 provider 的默认模型
+    6: optional i32 trigger_mode
+    7: optional string description
+    8: optional string avatar_url
+    9: optional list<string> tool_ids
 }
 
 struct UpdateBotResp {

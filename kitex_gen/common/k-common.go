@@ -2153,7 +2153,7 @@ func (p *BotInfo) FastRead(buf []byte) (int, error) {
 	var issetAvatarUrl bool = false
 	var issetDescription bool = false
 	var issetSystemPrompt bool = false
-	var issetModelName bool = false
+	var issetProvider bool = false
 	var issetTriggerMode bool = false
 	var issetToolIds bool = false
 	var issetCreatedAt bool = false
@@ -2250,7 +2250,7 @@ func (p *BotInfo) FastRead(buf []byte) (int, error) {
 				if err != nil {
 					goto ReadFieldError
 				}
-				issetModelName = true
+				issetProvider = true
 			} else {
 				l, err = thrift.Binary.Skip(buf[offset:], fieldTypeId)
 				offset += l
@@ -2259,8 +2259,22 @@ func (p *BotInfo) FastRead(buf []byte) (int, error) {
 				}
 			}
 		case 7:
-			if fieldTypeId == thrift.I32 {
+			if fieldTypeId == thrift.STRING {
 				l, err = p.FastReadField7(buf[offset:])
+				offset += l
+				if err != nil {
+					goto ReadFieldError
+				}
+			} else {
+				l, err = thrift.Binary.Skip(buf[offset:], fieldTypeId)
+				offset += l
+				if err != nil {
+					goto SkipFieldError
+				}
+			}
+		case 8:
+			if fieldTypeId == thrift.I32 {
+				l, err = p.FastReadField8(buf[offset:])
 				offset += l
 				if err != nil {
 					goto ReadFieldError
@@ -2273,9 +2287,9 @@ func (p *BotInfo) FastRead(buf []byte) (int, error) {
 					goto SkipFieldError
 				}
 			}
-		case 8:
+		case 9:
 			if fieldTypeId == thrift.LIST {
-				l, err = p.FastReadField8(buf[offset:])
+				l, err = p.FastReadField9(buf[offset:])
 				offset += l
 				if err != nil {
 					goto ReadFieldError
@@ -2288,9 +2302,9 @@ func (p *BotInfo) FastRead(buf []byte) (int, error) {
 					goto SkipFieldError
 				}
 			}
-		case 9:
+		case 10:
 			if fieldTypeId == thrift.STRING {
-				l, err = p.FastReadField9(buf[offset:])
+				l, err = p.FastReadField10(buf[offset:])
 				offset += l
 				if err != nil {
 					goto ReadFieldError
@@ -2303,9 +2317,9 @@ func (p *BotInfo) FastRead(buf []byte) (int, error) {
 					goto SkipFieldError
 				}
 			}
-		case 10:
+		case 11:
 			if fieldTypeId == thrift.STRING {
-				l, err = p.FastReadField10(buf[offset:])
+				l, err = p.FastReadField11(buf[offset:])
 				offset += l
 				if err != nil {
 					goto ReadFieldError
@@ -2352,28 +2366,28 @@ func (p *BotInfo) FastRead(buf []byte) (int, error) {
 		goto RequiredFieldNotSetError
 	}
 
-	if !issetModelName {
+	if !issetProvider {
 		fieldId = 6
 		goto RequiredFieldNotSetError
 	}
 
 	if !issetTriggerMode {
-		fieldId = 7
-		goto RequiredFieldNotSetError
-	}
-
-	if !issetToolIds {
 		fieldId = 8
 		goto RequiredFieldNotSetError
 	}
 
-	if !issetCreatedAt {
+	if !issetToolIds {
 		fieldId = 9
 		goto RequiredFieldNotSetError
 	}
 
-	if !issetUpdatedAt {
+	if !issetCreatedAt {
 		fieldId = 10
+		goto RequiredFieldNotSetError
+	}
+
+	if !issetUpdatedAt {
+		fieldId = 11
 		goto RequiredFieldNotSetError
 	}
 	return offset, nil
@@ -2467,11 +2481,25 @@ func (p *BotInfo) FastReadField6(buf []byte) (int, error) {
 		offset += l
 		_field = v
 	}
-	p.ModelName = _field
+	p.Provider = _field
 	return offset, nil
 }
 
 func (p *BotInfo) FastReadField7(buf []byte) (int, error) {
+	offset := 0
+
+	var _field *string
+	if v, l, err := thrift.Binary.ReadString(buf[offset:]); err != nil {
+		return offset, err
+	} else {
+		offset += l
+		_field = &v
+	}
+	p.ModelName = _field
+	return offset, nil
+}
+
+func (p *BotInfo) FastReadField8(buf []byte) (int, error) {
 	offset := 0
 
 	var _field int32
@@ -2485,7 +2513,7 @@ func (p *BotInfo) FastReadField7(buf []byte) (int, error) {
 	return offset, nil
 }
 
-func (p *BotInfo) FastReadField8(buf []byte) (int, error) {
+func (p *BotInfo) FastReadField9(buf []byte) (int, error) {
 	offset := 0
 
 	_, size, l, err := thrift.Binary.ReadListBegin(buf[offset:])
@@ -2509,7 +2537,7 @@ func (p *BotInfo) FastReadField8(buf []byte) (int, error) {
 	return offset, nil
 }
 
-func (p *BotInfo) FastReadField9(buf []byte) (int, error) {
+func (p *BotInfo) FastReadField10(buf []byte) (int, error) {
 	offset := 0
 
 	var _field string
@@ -2523,7 +2551,7 @@ func (p *BotInfo) FastReadField9(buf []byte) (int, error) {
 	return offset, nil
 }
 
-func (p *BotInfo) FastReadField10(buf []byte) (int, error) {
+func (p *BotInfo) FastReadField11(buf []byte) (int, error) {
 	offset := 0
 
 	var _field string
@@ -2544,16 +2572,17 @@ func (p *BotInfo) FastWrite(buf []byte) int {
 func (p *BotInfo) FastWriteNocopy(buf []byte, w thrift.NocopyWriter) int {
 	offset := 0
 	if p != nil {
-		offset += p.fastWriteField7(buf[offset:], w)
+		offset += p.fastWriteField8(buf[offset:], w)
 		offset += p.fastWriteField1(buf[offset:], w)
 		offset += p.fastWriteField2(buf[offset:], w)
 		offset += p.fastWriteField3(buf[offset:], w)
 		offset += p.fastWriteField4(buf[offset:], w)
 		offset += p.fastWriteField5(buf[offset:], w)
 		offset += p.fastWriteField6(buf[offset:], w)
-		offset += p.fastWriteField8(buf[offset:], w)
+		offset += p.fastWriteField7(buf[offset:], w)
 		offset += p.fastWriteField9(buf[offset:], w)
 		offset += p.fastWriteField10(buf[offset:], w)
+		offset += p.fastWriteField11(buf[offset:], w)
 	}
 	offset += thrift.Binary.WriteFieldStop(buf[offset:])
 	return offset
@@ -2572,6 +2601,7 @@ func (p *BotInfo) BLength() int {
 		l += p.field8Length()
 		l += p.field9Length()
 		l += p.field10Length()
+		l += p.field11Length()
 	}
 	l += thrift.Binary.FieldStopLength()
 	return l
@@ -2615,20 +2645,29 @@ func (p *BotInfo) fastWriteField5(buf []byte, w thrift.NocopyWriter) int {
 func (p *BotInfo) fastWriteField6(buf []byte, w thrift.NocopyWriter) int {
 	offset := 0
 	offset += thrift.Binary.WriteFieldBegin(buf[offset:], thrift.STRING, 6)
-	offset += thrift.Binary.WriteStringNocopy(buf[offset:], w, p.ModelName)
+	offset += thrift.Binary.WriteStringNocopy(buf[offset:], w, p.Provider)
 	return offset
 }
 
 func (p *BotInfo) fastWriteField7(buf []byte, w thrift.NocopyWriter) int {
 	offset := 0
-	offset += thrift.Binary.WriteFieldBegin(buf[offset:], thrift.I32, 7)
-	offset += thrift.Binary.WriteI32(buf[offset:], p.TriggerMode)
+	if p.IsSetModelName() {
+		offset += thrift.Binary.WriteFieldBegin(buf[offset:], thrift.STRING, 7)
+		offset += thrift.Binary.WriteStringNocopy(buf[offset:], w, *p.ModelName)
+	}
 	return offset
 }
 
 func (p *BotInfo) fastWriteField8(buf []byte, w thrift.NocopyWriter) int {
 	offset := 0
-	offset += thrift.Binary.WriteFieldBegin(buf[offset:], thrift.LIST, 8)
+	offset += thrift.Binary.WriteFieldBegin(buf[offset:], thrift.I32, 8)
+	offset += thrift.Binary.WriteI32(buf[offset:], p.TriggerMode)
+	return offset
+}
+
+func (p *BotInfo) fastWriteField9(buf []byte, w thrift.NocopyWriter) int {
+	offset := 0
+	offset += thrift.Binary.WriteFieldBegin(buf[offset:], thrift.LIST, 9)
 	listBeginOffset := offset
 	offset += thrift.Binary.ListBeginLength()
 	var length int
@@ -2640,16 +2679,16 @@ func (p *BotInfo) fastWriteField8(buf []byte, w thrift.NocopyWriter) int {
 	return offset
 }
 
-func (p *BotInfo) fastWriteField9(buf []byte, w thrift.NocopyWriter) int {
+func (p *BotInfo) fastWriteField10(buf []byte, w thrift.NocopyWriter) int {
 	offset := 0
-	offset += thrift.Binary.WriteFieldBegin(buf[offset:], thrift.STRING, 9)
+	offset += thrift.Binary.WriteFieldBegin(buf[offset:], thrift.STRING, 10)
 	offset += thrift.Binary.WriteStringNocopy(buf[offset:], w, p.CreatedAt)
 	return offset
 }
 
-func (p *BotInfo) fastWriteField10(buf []byte, w thrift.NocopyWriter) int {
+func (p *BotInfo) fastWriteField11(buf []byte, w thrift.NocopyWriter) int {
 	offset := 0
-	offset += thrift.Binary.WriteFieldBegin(buf[offset:], thrift.STRING, 10)
+	offset += thrift.Binary.WriteFieldBegin(buf[offset:], thrift.STRING, 11)
 	offset += thrift.Binary.WriteStringNocopy(buf[offset:], w, p.UpdatedAt)
 	return offset
 }
@@ -2692,18 +2731,27 @@ func (p *BotInfo) field5Length() int {
 func (p *BotInfo) field6Length() int {
 	l := 0
 	l += thrift.Binary.FieldBeginLength()
-	l += thrift.Binary.StringLengthNocopy(p.ModelName)
+	l += thrift.Binary.StringLengthNocopy(p.Provider)
 	return l
 }
 
 func (p *BotInfo) field7Length() int {
+	l := 0
+	if p.IsSetModelName() {
+		l += thrift.Binary.FieldBeginLength()
+		l += thrift.Binary.StringLengthNocopy(*p.ModelName)
+	}
+	return l
+}
+
+func (p *BotInfo) field8Length() int {
 	l := 0
 	l += thrift.Binary.FieldBeginLength()
 	l += thrift.Binary.I32Length()
 	return l
 }
 
-func (p *BotInfo) field8Length() int {
+func (p *BotInfo) field9Length() int {
 	l := 0
 	l += thrift.Binary.FieldBeginLength()
 	l += thrift.Binary.ListBeginLength()
@@ -2714,14 +2762,14 @@ func (p *BotInfo) field8Length() int {
 	return l
 }
 
-func (p *BotInfo) field9Length() int {
+func (p *BotInfo) field10Length() int {
 	l := 0
 	l += thrift.Binary.FieldBeginLength()
 	l += thrift.Binary.StringLengthNocopy(p.CreatedAt)
 	return l
 }
 
-func (p *BotInfo) field10Length() int {
+func (p *BotInfo) field11Length() int {
 	l := 0
 	l += thrift.Binary.FieldBeginLength()
 	l += thrift.Binary.StringLengthNocopy(p.UpdatedAt)
