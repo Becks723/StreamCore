@@ -41,7 +41,7 @@ func syncAllServers(ctx context.Context, registry *ToolRegistry, db ai.AIDatabas
 		if interval <= 0 {
 			interval = 5 * time.Minute
 		}
-		if time.Since(s.LastSyncedAt) < interval {
+		if s.LastSyncedAt != nil && time.Since(*s.LastSyncedAt) < interval {
 			continue
 		}
 

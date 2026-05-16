@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"StreamCore/internal/pkg/db/model"
+	"gorm.io/gorm/clause"
 )
 
 func (a *aidb) CreateBotUser(ctx context.Context, bot *model.UserModel) error {
@@ -20,7 +21,7 @@ func (a *aidb) DeleteBotUser(ctx context.Context, botID uint) error {
 
 func (a *aidb) GetBotUser(ctx context.Context, botID uint) (*model.UserModel, error) {
 	var user model.UserModel
-	err := a.db.WithContext(ctx).Where("id = ? AND is_bot = ?", botID, true).First(&user).Error
+	err := a.db.WithContext(ctx).Model(&model.UserModel{}).Where("id = ? AND is_bot = ?", botID, true).First(&user).Error
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +32,7 @@ func (a *aidb) ListBotUsers(ctx context.Context, page, pageSize int) ([]*model.U
 	var users []*model.UserModel
 	var total int64
 
-	db := a.db.WithContext(ctx).Where("is_bot = ?", true)
+	db := a.db.WithContext(ctx).Model(&model.UserModel{}).Where("is_bot = ?", true)
 
 	if err := db.Count(&total).Error; err != nil {
 		return nil, 0, err
@@ -46,12 +47,16 @@ func (a *aidb) ListBotUsers(ctx context.Context, page, pageSize int) ([]*model.U
 }
 
 func (a *aidb) AddBotToGroup(ctx context.Context, botID, groupID uint) error {
-	binding := &model.BotGroupModel{
-		BotID:   botID,
-		GroupID: groupID,
-		Status:  0,
-	}
-	return a.db.WithContext(ctx).Create(binding).Error
+	return a.db.WithContext(ctx).
+		Clauses(clause.OnConflict{
+			Columns:   []clause.Column{{Name: "bot_id"}, {Name: "group_id"}},
+			DoUpdates: clause.AssignmentColumns([]string{"status"}),
+		}).
+		Create(&model.BotGroupModel{
+			BotID:   botID,
+			GroupID: groupID,
+			Status:  0,
+		}).Error
 }
 
 func (a *aidb) RemoveBotFromGroup(ctx context.Context, botID, groupID uint) error {
@@ -64,9 +69,9 @@ func (a *aidb) RemoveBotFromGroup(ctx context.Context, botID, groupID uint) erro
 func (a *aidb) ListGroupBots(ctx context.Context, groupID uint) ([]*model.UserModel, error) {
 	var users []*model.UserModel
 	err := a.db.WithContext(ctx).
-		Table("users").
-		Joins("JOIN bot_groups ON users.id = bot_groups.bot_id").
-		Where("bot_groups.group_id = ? AND bot_groups.status = ? AND users.is_bot = ?", groupID, 0, true).
+		Model(&model.UserModel{}).
+		Joins("JOIN bot_group_models ON user_models.id = bot_group_models.bot_id").
+		Where("bot_group_models.group_id = ? AND bot_group_models.status = ? AND user_models.is_bot = ?", groupID, 0, true).
 		Find(&users).Error
 	if err != nil {
 		return nil, err

@@ -14,6 +14,7 @@ import (
 	kitexchat "StreamCore/kitex_gen/chat"
 	kitexcommon "StreamCore/kitex_gen/common"
 	"StreamCore/pkg/util"
+
 	"github.com/bytedance/sonic"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/hertz-contrib/websocket"
@@ -167,12 +168,14 @@ func handleGroupMessage(ctx context.Context, service *apichat.WSService, uid uin
 			log.Printf("push group tip failed uid=%d: %v", receiverUid, err)
 		}
 	}
+
+	// Trigger AI bots in the group
+	// Use background context since this runs async in a goroutine
+	go triggerAIBots(context.Background(), push.GroupId, push.FromUid, push.Content, push.Timestamp, push.MsgId)
 }
 
 func triggerAIBots(ctx context.Context, groupID, fromUID uint, content string, timestamp, msgID int64) {
-	// Use background context since this runs async in a goroutine
-	bgCtx := context.Background()
-	botsResp, err := rpc.ListGroupBotsRPC(bgCtx, &kitexai.ListGroupBotsReq{GroupId: util.Uint2String(groupID)})
+	botsResp, err := rpc.ListGroupBotsRPC(ctx, &kitexai.ListGroupBotsReq{GroupId: util.Uint2String(groupID)})
 	if err != nil {
 		log.Printf("triggerAIBots: list group bots failed group=%d: %v", groupID, err)
 		return
@@ -185,7 +188,7 @@ func triggerAIBots(ctx context.Context, groupID, fromUID uint, content string, t
 		if mentionedBotID == "" {
 			continue
 		}
-		_, err := rpc.ProcessMessageRPC(bgCtx, &kitexai.ProcessMessageReq{
+		_, err := rpc.ProcessMessageRPC(ctx, &kitexai.ProcessMessageReq{
 			RoomId:         util.Uint2String(groupID),
 			MsgId:          msgID,
 			FromUid:        util.Uint2String(fromUID),

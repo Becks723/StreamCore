@@ -52,7 +52,8 @@ func (r *ToolRegistry) SyncServer(ctx context.Context, server *model.MCPServerMo
 	}
 
 	// Update last synced time
-	server.LastSyncedAt = time.Now()
+	now := time.Now()
+	server.LastSyncedAt = &now
 	if err := r.db.UpdateServer(ctx, server); err != nil {
 		return fmt.Errorf("sync server %s: update last_synced_at: %w", server.ServerName, err)
 	}

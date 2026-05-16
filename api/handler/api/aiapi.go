@@ -85,7 +85,10 @@ func ListBots(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	if !pack.RespBizError(c, resp.Base) {
-		pack.RespWithData(c, resp)
+		pack.RespWithData(c, struct {
+			Bots  interface{} `json:"bots"`
+			Total *int32      `json:"total"`
+		}{Bots: resp.Bots, Total: resp.Total})
 	}
 }
 
@@ -214,7 +217,10 @@ func RegisterMCPServer(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	if !pack.RespBizError(c, resp.Base) {
-		pack.RespWithData(c, resp)
+		pack.RespWithData(c, struct {
+			Server interface{} `json:"server"`
+			Tools  interface{} `json:"tools"`
+		}{Server: resp.Server, Tools: resp.Tools})
 	}
 }
 

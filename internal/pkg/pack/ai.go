@@ -90,11 +90,18 @@ func MCPServerInfo(s *model.MCPServerModel) *kitexcommon.MCPServerInfo {
 		ServerName:      s.ServerName,
 		ServerUrl:       s.ServerURL,
 		SyncIntervalSec: int32(s.SyncIntervalSec),
-		LastSyncedAt:    s.LastSyncedAt.Format(time.DateTime),
+		LastSyncedAt:    formatTimePtr(s.LastSyncedAt),
 		Status:          int32(s.Status),
 		CreatedAt:       s.CreatedAt.Format(time.DateTime),
 		UpdatedAt:       s.UpdatedAt.Format(time.DateTime),
 	}
+}
+
+func formatTimePtr(t *time.Time) string {
+	if t == nil {
+		return ""
+	}
+	return t.Format(time.DateTime)
 }
 
 // CredentialInfo converts CredentialModel to thrift CredentialInfo.

@@ -17,9 +17,9 @@ type MCPServerModel struct {
 	ServerName      string `gorm:"size:128;uniqueIndex"`
 	ServerURL       string
 	AuthToken       string
-	SyncIntervalSec int `gorm:"default:300"`
-	LastSyncedAt    time.Time
-	Status          int `gorm:"default:1"` // 1: active, 0: disabled
+	SyncIntervalSec int        `gorm:"default:300"`
+	LastSyncedAt    *time.Time // NULL until first sync
+	Status          int        `gorm:"default:1"` // 1: active, 0: disabled
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 }
