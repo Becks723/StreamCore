@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"strconv"
 
 	aimodel "StreamCore/api/model/ai"
 	"StreamCore/api/pack"
@@ -35,7 +36,7 @@ func CreateBot(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	if !pack.RespBizError(c, resp.Base) {
-		pack.RespWithData(c, resp)
+		pack.RespWithData(c, resp.Bot)
 	}
 }
 
@@ -63,7 +64,7 @@ func UpdateBot(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	if !pack.RespBizError(c, resp.Base) {
-		pack.RespWithData(c, resp)
+		pack.RespWithData(c, resp.Bot)
 	}
 }
 
@@ -91,40 +92,40 @@ func ListBots(ctx context.Context, c *app.RequestContext) {
 // GetBot .
 // @router /ai/bot/:bot_id [GET]
 func GetBot(ctx context.Context, c *app.RequestContext) {
-	var req aimodel.GetBotReq
-	if err := c.BindAndValidate(&req); err != nil {
-		pack.RespParamError(c, err)
+	botID := c.Param("bot_id")
+	if botID == "" {
+		pack.RespParamError(c, nil)
 		return
 	}
 	resp, err := rpc.GetBotRPC(ctx, &kitexai.GetBotReq{
-		BotId: req.BotID,
+		BotId: botID,
 	})
 	if err != nil {
 		pack.RespRPCError(c, err)
 		return
 	}
 	if !pack.RespBizError(c, resp.Base) {
-		pack.RespWithData(c, resp)
+		pack.RespWithData(c, resp.Bot)
 	}
 }
 
 // DeleteBot .
 // @router /ai/bot/:bot_id [DELETE]
 func DeleteBot(ctx context.Context, c *app.RequestContext) {
-	var req aimodel.DeleteBotReq
-	if err := c.BindAndValidate(&req); err != nil {
-		pack.RespParamError(c, err)
+	botID := c.Param("bot_id")
+	if botID == "" {
+		pack.RespParamError(c, nil)
 		return
 	}
 	resp, err := rpc.DeleteBotRPC(ctx, &kitexai.DeleteBotReq{
-		BotId: req.BotID,
+		BotId: botID,
 	})
 	if err != nil {
 		pack.RespRPCError(c, err)
 		return
 	}
 	if !pack.RespBizError(c, resp.Base) {
-		pack.RespWithData(c, resp)
+		pack.RespSuccess(c)
 	}
 }
 
@@ -147,7 +148,7 @@ func AddBotToGroup(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	if !pack.RespBizError(c, resp.Base) {
-		pack.RespWithData(c, resp)
+		pack.RespSuccess(c)
 	}
 }
 
@@ -168,27 +169,27 @@ func RemoveBotFromGroup(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	if !pack.RespBizError(c, resp.Base) {
-		pack.RespWithData(c, resp)
+		pack.RespSuccess(c)
 	}
 }
 
 // ListGroupBots .
 // @router /ai/group/:group_id/bots [GET]
 func ListGroupBots(ctx context.Context, c *app.RequestContext) {
-	var req aimodel.ListGroupBotsReq
-	if err := c.BindAndValidate(&req); err != nil {
-		pack.RespParamError(c, err)
+	groupID := c.Param("group_id")
+	if groupID == "" {
+		pack.RespParamError(c, nil)
 		return
 	}
 	resp, err := rpc.ListGroupBotsRPC(ctx, &kitexai.ListGroupBotsReq{
-		GroupId: req.GroupID,
+		GroupId: groupID,
 	})
 	if err != nil {
 		pack.RespRPCError(c, err)
 		return
 	}
 	if !pack.RespBizError(c, resp.Base) {
-		pack.RespWithData(c, resp)
+		pack.RespWithData(c, resp.Bots)
 	}
 }
 
@@ -233,7 +234,7 @@ func RefreshMCPServer(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	if !pack.RespBizError(c, resp.Base) {
-		pack.RespWithData(c, resp)
+		pack.RespWithData(c, resp.Tools)
 	}
 }
 
@@ -246,27 +247,32 @@ func ListMCPServers(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	if !pack.RespBizError(c, resp.Base) {
-		pack.RespWithData(c, resp)
+		pack.RespWithData(c, resp.Data)
 	}
 }
 
 // DeleteMCPServer .
 // @router /ai/mcp/server/:server_id [DELETE]
 func DeleteMCPServer(ctx context.Context, c *app.RequestContext) {
-	var req aimodel.DeleteMCPServerReq
-	if err := c.BindAndValidate(&req); err != nil {
+	serverID := c.Param("server_id")
+	if serverID == "" {
+		pack.RespParamError(c, nil)
+		return
+	}
+	sid, err := strconv.ParseInt(serverID, 10, 64)
+	if err != nil {
 		pack.RespParamError(c, err)
 		return
 	}
 	resp, err := rpc.DeleteMCPServerRPC(ctx, &kitexai.DeleteMCPServerReq{
-		ServerId: req.ServerID,
+		ServerId: sid,
 	})
 	if err != nil {
 		pack.RespRPCError(c, err)
 		return
 	}
 	if !pack.RespBizError(c, resp.Base) {
-		pack.RespWithData(c, resp)
+		pack.RespSuccess(c)
 	}
 }
 
@@ -279,7 +285,7 @@ func ListTools(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	if !pack.RespBizError(c, resp.Base) {
-		pack.RespWithData(c, resp)
+		pack.RespWithData(c, resp.Data)
 	}
 }
 
@@ -303,27 +309,27 @@ func SaveCredential(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	if !pack.RespBizError(c, resp.Base) {
-		pack.RespWithData(c, resp)
+		pack.RespWithData(c, resp.Credential)
 	}
 }
 
 // DeleteCredential .
 // @router /ai/credential/:credential_id [DELETE]
 func DeleteCredential(ctx context.Context, c *app.RequestContext) {
-	var req aimodel.DeleteCredentialReq
-	if err := c.BindAndValidate(&req); err != nil {
-		pack.RespParamError(c, err)
+	credID := c.Param("credential_id")
+	if credID == "" {
+		pack.RespParamError(c, nil)
 		return
 	}
 	resp, err := rpc.DeleteCredentialRPC(ctx, &kitexai.DeleteCredentialReq{
-		CredentialId: req.CredentialID,
+		CredentialId: credID,
 	})
 	if err != nil {
 		pack.RespRPCError(c, err)
 		return
 	}
 	if !pack.RespBizError(c, resp.Base) {
-		pack.RespWithData(c, resp)
+		pack.RespSuccess(c)
 	}
 }
 
@@ -343,6 +349,6 @@ func ListCredentials(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	if !pack.RespBizError(c, resp.Base) {
-		pack.RespWithData(c, resp)
+		pack.RespWithData(c, resp.Data)
 	}
 }
