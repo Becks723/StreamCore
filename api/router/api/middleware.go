@@ -236,8 +236,7 @@ func _refreshtokenMw() []app.HandlerFunc {
 }
 
 func _aiMw() []app.HandlerFunc {
-	// your code...
-	return nil
+	return []app.HandlerFunc{middleware.JWTAuthFunc()}
 }
 
 func _botMw() []app.HandlerFunc {
