@@ -26,7 +26,7 @@ func CreateBot(s *AIService, req *kitexai.CreateBotReq) (*kitexai.CreateBotResp,
 	bot := &model.UserModel{
 		Username:  req.GetBotName(),
 		IsBot:     true,
-		BotConfig: pack.BotConfigToJSON(cfg),
+		BotConfig: pack.BotConfigPtr(cfg),
 	}
 
 	if err := s.db.CreateBotUser(s.ctx, bot); err != nil {
@@ -72,7 +72,7 @@ func UpdateBot(s *AIService, req *kitexai.UpdateBotReq) (*kitexai.UpdateBotResp,
 		cfg.ToolIDs = req.GetToolIds()
 	}
 
-	bot.BotConfig = pack.BotConfigToJSON(cfg)
+	bot.BotConfig = pack.BotConfigPtr(cfg)
 
 	if err := s.db.UpdateBotUser(s.ctx, bot); err != nil {
 		return nil, fmt.Errorf("UpdateBot: update user failed: %w", err)

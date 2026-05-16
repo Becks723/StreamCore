@@ -5,11 +5,11 @@ import "gorm.io/gorm"
 type UserModel struct {
 	gorm.Model
 
-	Username   string `gorm:"column:username;unique"` // username should be unique
-	Password   string `gorm:"column:password"`
-	AvatarUrl  string `gorm:"column:avatar_url"` // gorm default maps struct names as snake_case, so this column tag is optional.
-	TOTPSecret string `gorm:"column:totp_secret"`
-	TokenId    string `gorm:"column:token_id"`
-	IsBot      bool   `gorm:"column:is_bot;default:0"`
-	BotConfig  string `gorm:"column:bot_config;type:json"` // JSON: {"system_prompt","model_name","trigger_mode","tool_ids"}
+	Username   string  `gorm:"column:username;unique"` // username should be unique
+	Password   string  `gorm:"column:password"`
+	AvatarUrl  string  `gorm:"column:avatar_url"` // gorm default maps struct names as snake_case, so this column tag is optional.
+	TOTPSecret string  `gorm:"column:totp_secret"`
+	TokenId    string  `gorm:"column:token_id"`
+	IsBot      bool    `gorm:"column:is_bot;default:0"`
+	BotConfig  *string `gorm:"column:bot_config;type:json"` // NULL for regular users, JSON for bots
 }

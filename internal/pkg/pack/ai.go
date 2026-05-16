@@ -31,13 +31,19 @@ func BotConfigToJSON(cfg *BotConfigData) string {
 	return data
 }
 
-// ParseBotConfig parses JSON string to BotConfigData.
-func ParseBotConfig(raw string) *BotConfigData {
+// BotConfigPtr returns a *string pointing to the JSON representation of cfg.
+func BotConfigPtr(cfg *BotConfigData) *string {
+	s := BotConfigToJSON(cfg)
+	return &s
+}
+
+// ParseBotConfig parses a bot_config JSON string or nil to BotConfigData.
+func ParseBotConfig(raw *string) *BotConfigData {
 	cfg := &BotConfigData{}
-	if raw == "" {
+	if raw == nil || *raw == "" {
 		return cfg
 	}
-	_ = sonic.UnmarshalString(raw, cfg)
+	_ = sonic.UnmarshalString(*raw, cfg)
 	if cfg.ToolIDs == nil {
 		cfg.ToolIDs = []string{}
 	}
