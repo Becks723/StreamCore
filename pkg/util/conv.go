@@ -43,6 +43,18 @@ func StringOrNil(s string) *string {
 	return &s
 }
 
+func BoolPtr(b bool) *bool {
+	return &b
+}
+
+func StringPtr(s string) *string {
+	return &s
+}
+
+func Int32Ptr(i int32) *int32 {
+	return &i
+}
+
 func FromTimestamp(ts string) (time.Time, error) {
 	unix, err := strconv.ParseUint(ts, 10, 64)
 	if err != nil {

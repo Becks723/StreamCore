@@ -3,13 +3,16 @@ package api
 import (
 	"context"
 	"log"
+	"regexp"
 	"strings"
 
 	apichat "StreamCore/api/chat"
 	"StreamCore/api/pack"
 	"StreamCore/api/rpc"
 	"StreamCore/internal/pkg/base/rpccontext"
+	kitexai "StreamCore/kitex_gen/ai"
 	kitexchat "StreamCore/kitex_gen/chat"
+	kitexcommon "StreamCore/kitex_gen/common"
 	"StreamCore/pkg/util"
 	"github.com/bytedance/sonic"
 	"github.com/cloudwego/hertz/pkg/app"
@@ -164,6 +167,47 @@ func handleGroupMessage(ctx context.Context, service *apichat.WSService, uid uin
 			log.Printf("push group tip failed uid=%d: %v", receiverUid, err)
 		}
 	}
+
+	// Trigger AI bots in the group
+	// Use background context since this runs async in a goroutine
+	go triggerAIBots(context.Background(), push.GroupId, push.FromUid, push.Content, push.Timestamp, push.MsgId)
+}
+
+func triggerAIBots(ctx context.Context, groupID, fromUID uint, content string, timestamp, msgID int64) {
+	botsResp, err := rpc.ListGroupBotsRPC(ctx, &kitexai.ListGroupBotsReq{GroupId: util.Uint2String(groupID)})
+	if err != nil {
+		log.Printf("triggerAIBots: list group bots failed group=%d: %v", groupID, err)
+		return
+	}
+	if botsResp == nil || botsResp.Bots == nil {
+		return
+	}
+	for _, bot := range botsResp.Bots {
+		mentionedBotID := findMentionedBot(content, bot)
+		if mentionedBotID == "" {
+			continue
+		}
+		_, err := rpc.ProcessMessageRPC(ctx, &kitexai.ProcessMessageReq{
+			RoomId:         util.Uint2String(groupID),
+			MsgId:          msgID,
+			FromUid:        util.Uint2String(fromUID),
+			Content:        content,
+			Timestamp:      timestamp,
+			MentionedBotId: mentionedBotID,
+		})
+		if err != nil {
+			log.Printf("triggerAIBots: ProcessMessage failed bot=%s: %v", bot.BotId, err)
+		}
+	}
+}
+
+func findMentionedBot(content string, bot *kitexcommon.BotInfo) string {
+	// Match "@bot_name" with word boundary after the name (space, punctuation, end of string)
+	pattern := `@` + regexp.QuoteMeta(bot.BotName) + `\b`
+	if matched, _ := regexp.MatchString(pattern, content); matched {
+		return bot.BotId
+	}
+	return ""
 }
 
 func buildPreview(content string) string {

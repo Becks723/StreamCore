@@ -39,6 +39,10 @@ func InitMySQL() (*gorm.DB, error) {
 		&model.ChatGroupModel{},
 		&model.ChatGroupMemberModel{},
 		&model.ChatGroupApplyModel{},
+		&model.BotGroupModel{},
+		&model.MCPServerModel{},
+		&model.MCPToolModel{},
+		&model.CredentialModel{},
 	)
 	if err != nil {
 		return nil, fmt.Errorf("error auto migrating: %w", err)

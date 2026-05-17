@@ -8,14 +8,15 @@ import (
 )
 
 type config struct {
-	Server   serverConfig  `mapstructure:"server"`
-	MySQL    *mySql        `mapstructure:"mysql"`
-	General  generalConfig `mapstructure:"general"`
-	Redis    *redis        `mapstructure:"redis"`
-	RabbitMQ *rabbitmq     `mapstructure:"rabbitmq"`
-	Etcd     *etcd         `mapstructure:"etcd"`
-	Otel     *otel         `mapstructure:"otel"`
-	Service  *svc
+	Server    serverConfig     `mapstructure:"server"`
+	MySQL     *mySql           `mapstructure:"mysql"`
+	General   generalConfig    `mapstructure:"general"`
+	Redis     *redis           `mapstructure:"redis"`
+	RabbitMQ  *rabbitmq        `mapstructure:"rabbitmq"`
+	Etcd      *etcd            `mapstructure:"etcd"`
+	Otel      *otel            `mapstructure:"otel"`
+	Providers []ProviderConfig `mapstructure:"providers"`
+	Service   *svc
 }
 
 var (
@@ -101,4 +102,12 @@ type svc struct {
 // extension: add method for config to get specified svc type
 // func (c *config) ServiceAsXXX() *XXXSvc {
 //
-// }
+// 」
+
+type ProviderConfig struct {
+	Name         string `mapstructure:"name"`
+	Type         string `mapstructure:"type"`
+	APIKey       string `mapstructure:"api_key"`
+	BaseURL      string `mapstructure:"base_url"`
+	DefaultModel string `mapstructure:"default_model"`
+}

@@ -57,3 +57,19 @@ services:
     name: group
     addr:
       - 0.0.0.0:20007
+  ai:
+    name: ai
+    addr:
+      - 0.0.0.0:20008
+
+providers:
+  - name: "openai-default"
+    type: "openai"
+    api_key: "${OPENAI_API_KEY}"
+    base_url: ""
+    default_model: "gpt-4o"
+  - name: "deepseek"
+    type: "openai"
+    api_key: "${DEEPSEEK_API_KEY}"
+    base_url: "https://api.deepseek.com/v1"
+    default_model: "deepseek-chat"

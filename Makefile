@@ -10,7 +10,7 @@ API_PATH=$(DIR)/cmd/api
 MODULE := $(shell grep "^module" go.mod | awk '{print $$2}')
 
 # 服务名
-SERVICES=api user video interaction social chat group
+SERVICES=api user video interaction social chat group ai
 service=$(word 1, $@)
 
 PREFIX="[MAKEFILE]"
@@ -75,3 +75,6 @@ lint:
 .PHONY: vulncheck
 vulncheck:
 	govulncheck ./...
+
+.PHONY: verify
+verify: lint vulncheck

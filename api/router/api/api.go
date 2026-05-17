@@ -19,6 +19,37 @@ func Register(r *server.Hertz) {
 	root := r.Group("/", rootMw()...)
 	root.GET("/chat", append(_chathandlerMw(), api.ChatHandler)...)
 	{
+		_ai := root.Group("/ai", _aiMw()...)
+		_ai.POST("/bot", append(_createbotMw(), api.CreateBot)...)
+		_bot := _ai.Group("/bot", _botMw()...)
+		_bot.DELETE("/:bot_id", append(_deletebotMw(), api.DeleteBot)...)
+		_bot.GET("/:bot_id", append(_getbotMw(), api.GetBot)...)
+		_bot.DELETE("/group", append(_removebotfromgroupMw(), api.RemoveBotFromGroup)...)
+		_bot.POST("/group", append(_addbottogroupMw(), api.AddBotToGroup)...)
+		_ai.PUT("/bot", append(_updatebotMw(), api.UpdateBot)...)
+		_ai.GET("/bots", append(_listbotsMw(), api.ListBots)...)
+		_ai.POST("/credential", append(_savecredentialMw(), api.SaveCredential)...)
+		_credential := _ai.Group("/credential", _credentialMw()...)
+		_credential.DELETE("/:credential_id", append(_deletecredentialMw(), api.DeleteCredential)...)
+		_ai.GET("/credentials", append(_listcredentialsMw(), api.ListCredentials)...)
+		_ai.GET("/tools", append(_listtoolsMw(), api.ListTools)...)
+		{
+			_group := _ai.Group("/group", _groupMw()...)
+			{
+				_group_id := _group.Group("/:group_id", _group_idMw()...)
+				_group_id.GET("/bots", append(_listgroupbotsMw(), api.ListGroupBots)...)
+			}
+		}
+		{
+			_mcp := _ai.Group("/mcp", _mcpMw()...)
+			_mcp.POST("/server", append(_registermcpserverMw(), api.RegisterMCPServer)...)
+			_server := _mcp.Group("/server", _serverMw()...)
+			_server.POST("/refresh", append(_refreshmcpserverMw(), api.RefreshMCPServer)...)
+			_server.DELETE("/:server_id", append(_deletemcpserverMw(), api.DeleteMCPServer)...)
+			_mcp.GET("/servers", append(_listmcpserversMw(), api.ListMCPServers)...)
+		}
+	}
+	{
 		_auth := root.Group("/auth", _authMw()...)
 		_auth.POST("/refresh", append(_refreshtokenMw(), api.RefreshToken)...)
 		{
@@ -31,13 +62,13 @@ func Register(r *server.Hertz) {
 	{
 		_chat := root.Group("/chat", _chatMw()...)
 		{
-			_group := _chat.Group("/group", _groupMw()...)
-			_group.POST("/apply", append(_applyjoingroupMw(), api.ApplyJoinGroup)...)
-			_apply := _group.Group("/apply", _applyMw()...)
+			_group0 := _chat.Group("/group", _group0Mw()...)
+			_group0.POST("/apply", append(_applyjoingroupMw(), api.ApplyJoinGroup)...)
+			_apply := _group0.Group("/apply", _applyMw()...)
 			_apply.POST("/respond", append(_respondgroupapplyMw(), api.RespondGroupApply)...)
-			_group.POST("/create", append(_creategroupMw(), api.CreateGroup)...)
+			_group0.POST("/create", append(_creategroupMw(), api.CreateGroup)...)
 			{
-				_history := _group.Group("/history", _historyMw()...)
+				_history := _group0.Group("/history", _historyMw()...)
 				_history.GET("/all", append(_listgroupmessagesallMw(), api.ListGroupMessagesAll)...)
 				_history.GET("/page", append(_listgroupmessagesMw(), api.ListGroupMessages)...)
 			}

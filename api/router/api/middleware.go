@@ -234,3 +234,117 @@ func _refreshtokenMw() []app.HandlerFunc {
 	// your code...
 	return nil
 }
+
+func _aiMw() []app.HandlerFunc {
+	return []app.HandlerFunc{middleware.JWTAuthFunc()}
+}
+
+func _botMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}
+
+func _createbotMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}
+
+func _deletebotMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}
+
+func _getbotMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}
+
+func _removebotfromgroupMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}
+
+func _addbottogroupMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}
+
+func _updatebotMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}
+
+func _listbotsMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}
+
+func _credentialMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}
+
+func _savecredentialMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}
+
+func _deletecredentialMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}
+
+func _listcredentialsMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}
+
+func _listtoolsMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}
+
+func _group_idMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}
+
+func _listgroupbotsMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}
+
+func _mcpMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}
+
+func _serverMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}
+
+func _registermcpserverMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}
+
+func _refreshmcpserverMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}
+
+func _deletemcpserverMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}
+
+func _listmcpserversMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}
+
+func _group0Mw() []app.HandlerFunc {
+	// your code...
+	return nil
+}

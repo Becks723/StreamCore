@@ -6,6 +6,7 @@ include "interaction.thrift"
 include "social.thrift"
 include "chat.thrift"
 include "group.thrift"
+include "ai.thrift"
 
 service UserApi {
     user.RegisterResp  Register(1: required user.RegisterReq req) (api.post="/user/register")
@@ -59,4 +60,26 @@ struct PlaceholderResp {}
 
 service WsApi {
     PlaceholderResp ChatHandler() (api.get="/chat")
+}
+
+service AIApi {
+    ai.CreateBotResp CreateBot(1: required ai.CreateBotReq req) (api.post="/ai/bot")
+    ai.UpdateBotResp UpdateBot(1: required ai.UpdateBotReq req) (api.put="/ai/bot")
+    ai.ListBotsResp  ListBots(1: required ai.ListBotsReq req) (api.get="/ai/bots")
+    ai.GetBotResp    GetBot(1: required ai.GetBotReq req) (api.get="/ai/bot/:bot_id")
+    ai.DeleteBotResp DeleteBot(1: required ai.DeleteBotReq req) (api.delete="/ai/bot/:bot_id")
+
+    ai.AddBotToGroupResp    AddBotToGroup(1: required ai.AddBotToGroupReq req) (api.post="/ai/bot/group")
+    ai.RemoveBotFromGroupResp RemoveBotFromGroup(1: required ai.RemoveBotFromGroupReq req) (api.delete="/ai/bot/group")
+    ai.ListGroupBotsResp    ListGroupBots(1: required ai.ListGroupBotsReq req) (api.get="/ai/group/:group_id/bots")
+
+    ai.RegisterMCPServerResp  RegisterMCPServer(1: required ai.RegisterMCPServerReq req) (api.post="/ai/mcp/server")
+    ai.RefreshMCPServerResp   RefreshMCPServer(1: required ai.RefreshMCPServerReq req) (api.post="/ai/mcp/server/refresh")
+    ai.ListMCPServersResp     ListMCPServers(1: required ai.ListMCPServersReq req) (api.get="/ai/mcp/servers")
+    ai.DeleteMCPServerResp    DeleteMCPServer(1: required ai.DeleteMCPServerReq req) (api.delete="/ai/mcp/server/:server_id")
+    ai.ListToolsResp          ListTools(1: required ai.ListToolsReq req) (api.get="/ai/tools")
+
+    ai.SaveCredentialResp   SaveCredential(1: required ai.SaveCredentialReq req) (api.post="/ai/credential")
+    ai.DeleteCredentialResp DeleteCredential(1: required ai.DeleteCredentialReq req) (api.delete="/ai/credential/:credential_id")
+    ai.ListCredentialsResp  ListCredentials(1: required ai.ListCredentialsReq req) (api.get="/ai/credentials")
 }
