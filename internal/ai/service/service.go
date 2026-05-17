@@ -8,6 +8,7 @@ import (
 	"StreamCore/internal/pkg/base"
 	"StreamCore/internal/pkg/db/ai"
 	"StreamCore/kitex_gen/chat/chatservice"
+	"github.com/redis/go-redis/v9"
 )
 
 type AIService struct {
@@ -17,6 +18,7 @@ type AIService struct {
 	chatClient chatservice.Client
 	agent      *agent.Agent
 	toolReg    *mcp.ToolRegistry
+	rdb        *redis.Client
 }
 
 func NewAIService(ctx context.Context, infra *base.InfraSet, ag *agent.Agent, tr *mcp.ToolRegistry) *AIService {
@@ -27,5 +29,6 @@ func NewAIService(ctx context.Context, infra *base.InfraSet, ag *agent.Agent, tr
 		chatClient: infra.ChatClient,
 		agent:      ag,
 		toolReg:    tr,
+		rdb:        infra.RDB,
 	}
 }

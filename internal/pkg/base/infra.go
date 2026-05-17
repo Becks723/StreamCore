@@ -13,6 +13,7 @@ import (
 	"StreamCore/kitex_gen/chat/chatservice"
 	"StreamCore/kitex_gen/group/groupservice"
 	"github.com/elastic/go-elasticsearch/v8"
+	"github.com/redis/go-redis/v9"
 )
 
 type InfraSet struct {
@@ -20,6 +21,7 @@ type InfraSet struct {
 	DB          *db.DatabaseSet
 	ES          *elasticsearch.TypedClient
 	MQ          *mq.MQSet
+	RDB         *redis.Client
 	GroupClient groupservice.Client
 	ChatClient  chatservice.Client
 }
@@ -58,6 +60,7 @@ func WithCache() Option {
 			log.Fatal(err)
 		}
 		s.Cache = cache.NewCacheSet(rdb)
+		s.RDB = rdb
 	}
 }
 
