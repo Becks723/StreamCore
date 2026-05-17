@@ -75,3 +75,6 @@ lint:
 .PHONY: vulncheck
 vulncheck:
 	govulncheck ./...
+
+.PHONY: verify
+verify: lint vulncheck
