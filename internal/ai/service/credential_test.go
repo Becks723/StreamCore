@@ -143,9 +143,9 @@ func TestAIService_Credential(t *testing.T) {
 			mockInfraSet := &base.InfraSet{DB: db.NewDatabaseSet(nil)}
 			svc := NewAIService(context.Background(), mockInfraSet, &agent.Agent{}, &mcp.ToolRegistry{})
 
-			switch {
-			case tc.name == "SaveCredential-新建成功" || tc.name == "SaveCredential-更新已有" ||
-				tc.name == "SaveCredential-GetCredentialDB错误" || tc.name == "SaveCredential-Save DB错误":
+			switch tc.name {
+			case "SaveCredential-新建成功", "SaveCredential-更新已有",
+				"SaveCredential-GetCredentialDB错误", "SaveCredential-Save DB错误":
 				resp, err := SaveCredential(svc, uid, &kitexai.SaveCredentialReq{
 					ServiceName: tc.serviceName,
 					Username:    tc.username,
@@ -164,8 +164,8 @@ func TestAIService_Credential(t *testing.T) {
 					}
 				}
 
-			case tc.name == "DeleteCredential-成功" || tc.name == "DeleteCredential-无效ID" ||
-				tc.name == "DeleteCredential-DB错误":
+			case "DeleteCredential-成功", "DeleteCredential-无效ID",
+				"DeleteCredential-DB错误":
 				resp, err := DeleteCredential(svc, &kitexai.DeleteCredentialReq{
 					CredentialId: tc.credentialID,
 				})
@@ -177,7 +177,7 @@ func TestAIService_Credential(t *testing.T) {
 					So(resp, ShouldNotBeNil)
 				}
 
-			case tc.name == "ListCredentials-成功":
+			case "ListCredentials-成功":
 				resp, err := ListCredentials(svc, uid, &kitexai.ListCredentialsReq{})
 				if tc.expectingError {
 					So(err, ShouldNotBeNil)

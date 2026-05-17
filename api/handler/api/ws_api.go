@@ -14,7 +14,6 @@ import (
 	kitexchat "StreamCore/kitex_gen/chat"
 	kitexcommon "StreamCore/kitex_gen/common"
 	"StreamCore/pkg/util"
-
 	"github.com/bytedance/sonic"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/hertz-contrib/websocket"
