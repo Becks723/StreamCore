@@ -15,9 +15,15 @@ import (
 	"StreamCore/internal/pkg/constants"
 	"StreamCore/pkg/util"
 	"context"
+
+	sentinel "github.com/alibaba/sentinel-golang/api"
+	"github.com/alibaba/sentinel-golang/core/flow"
+	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
+	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"github.com/hertz-contrib/cors"
 	"github.com/hertz-contrib/obs-opentelemetry/tracing"
+	hertzSentinel "github.com/hertz-contrib/opensergo/sentinel/adapter"
 )
 
 var (
@@ -69,8 +75,47 @@ func main() {
 	}))
 	h.Use(tracing.ServerMiddleware(tcfg)) // tracing中间件
 
+	// Sentinel
+	initSentinel()
+	h.Use(hertzSentinel.SentinelServerMiddleware(
+		// customize resource extractor if required
+		// method_path by default
+		hertzSentinel.WithServerResourceExtractor(func(ctx context.Context, c *app.RequestContext) string {
+			return "api"
+		}),
+		// customize block fallback if required
+		// abort with status 429 by default
+		hertzSentinel.WithServerBlockFallback(func(ctx context.Context, c *app.RequestContext) {
+			log.Printf("frequent requests have been rejected by gateway. clientIP: %s", c.ClientIP())
+			c.AbortWithStatusJSON(consts.StatusInternalServerError, map[string]interface{}{
+				"code": consts.StatusInternalServerError,
+				"err":  "服务器当前处于请求高峰。请稍后再试",
+			})
+		}),
+	))
+
 	h.Static("/static", "./uploads")
 
 	router.GeneratedRegister(h)
 	h.Spin()
+}
+
+func initSentinel() {
+	err := sentinel.InitDefault()
+	if err != nil {
+		log.Fatalf("Unexpected error: %+v", err)
+	}
+	_, err = flow.LoadRules([]*flow.Rule{
+		{
+			Resource:               "api",
+			Threshold:              0.0,
+			TokenCalculateStrategy: flow.Direct,
+			ControlBehavior:        flow.Reject,
+			StatIntervalInMs:       1000,
+		},
+	})
+	if err != nil {
+		log.Fatalf("Unexpected error: %+v", err)
+		return
+	}
 }
