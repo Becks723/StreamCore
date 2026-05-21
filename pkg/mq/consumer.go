@@ -23,7 +23,9 @@ func NewRabbitConsumer(conn *amqp.Connection, queueName string) (Consumer, error
 	if err != nil {
 		return nil, fmt.Errorf("error conn.Channel: %w", err)
 	}
-	_, err = ch.QueueDeclare(queueName, false, false, false, false, nil)
+
+	// durable queue: match sender declaration
+	_, err = ch.QueueDeclare(queueName, true, false, false, false, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error ch.QueueDeclare: %w", err)
 	}
