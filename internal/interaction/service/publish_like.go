@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"StreamCore/internal/pkg/constants"
@@ -126,7 +127,8 @@ func (s *InteractionService) consumer(ctx context.Context) {
 
 		// >>>> consume like event <<<<
 		if err = s.consumeLikeEvent(ctx, &ev); err != nil {
-
+			log.Printf("consume like event failed: %v, event: %+v", err, ev)
+			c.Nack(msg, true)
 		} else {
 			c.Ack(msg)
 		}
