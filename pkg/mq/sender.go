@@ -2,9 +2,12 @@ package mq
 
 import (
 	"context"
+	"errors"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
+
+var errPublishNotConfirmed = errors.New("message publish not confirmed by broker")
 
 type Sender interface {
 	Send(ctx context.Context, buffer []byte) error
@@ -16,15 +19,24 @@ func NewRabbitSender(conn *amqp.Connection, queueName string) (Sender, error) {
 	if err != nil {
 		return nil, err
 	}
-	_, err = ch.QueueDeclare(queueName, false, false, false, false, nil)
+
+	// durable queue: survive broker restart
+	_, err = ch.QueueDeclare(queueName, true, false, false, false, nil)
 	if err != nil {
 		return nil, err
 	}
+
+	// publisher confirm: ensure messages are accepted by broker
+	if err = ch.Confirm(false); err != nil {
+		return nil, err
+	}
+	confirms := ch.NotifyPublish(make(chan amqp.Confirmation, 1))
 
 	return &RabbitSender{
 		conn:      conn,
 		ch:        ch,
 		queueName: queueName,
+		confirms:  confirms,
 	}, nil
 }
 
@@ -36,13 +48,24 @@ func (s *RabbitSender) Send(ctx context.Context, buffer []byte) error {
 		false,
 		false,
 		amqp.Publishing{
-			ContentType: "text/plain",
-			Body:        buffer,
+			ContentType:  "text/plain",
+			Body:         buffer,
+			DeliveryMode: amqp.Persistent,
 		})
 	if err != nil {
 		return err
 	}
-	return nil
+
+	// wait for confirmation
+	select {
+	case conf := <-s.confirms:
+		if !conf.Ack {
+			return errPublishNotConfirmed
+		}
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
 }
 
 func (s *RabbitSender) Close() {
@@ -55,4 +78,5 @@ type RabbitSender struct {
 	ch        *amqp.Channel
 	queueName string
 	exchange  string
+	confirms  <-chan amqp.Confirmation
 }
