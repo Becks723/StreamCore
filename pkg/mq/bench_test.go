@@ -53,7 +53,7 @@ func BenchmarkRabbitMQConsume(b *testing.B) {
 	sender, _ := NewRabbitSender(conn, queueName)
 	payload, _ := json.Marshal(map[string]string{"test": "data"})
 	for i := 0; i < b.N+100; i++ {
-		sender.Send(context.Background(), payload)
+		_ = sender.Send(context.Background(), payload)
 	}
 
 	consumer, err := NewRabbitConsumer(conn, queueName)
