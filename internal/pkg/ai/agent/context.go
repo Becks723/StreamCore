@@ -26,7 +26,7 @@ func buildProactiveContext(history []*domain.GroupMessage) []llm.Message {
 		if content == "" {
 			continue
 		}
-		b.WriteString(fmt.Sprintf("用户%d：%s\n", msg.FromUid, content))
+		fmt.Fprintf(&b, "用户%d：%s\n", msg.FromUid, content)
 	}
 	b.WriteString("\n请基于这些记录，自然接一句适合继续聊天的话。")
 	return []llm.Message{
