@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"StreamCore/internal/pkg/cache/ai"
 	"StreamCore/internal/pkg/cache/group"
 	"StreamCore/internal/pkg/cache/interaction"
 	"StreamCore/internal/pkg/cache/social"
@@ -10,6 +11,7 @@ import (
 )
 
 type CacheSet struct {
+	AI          ai.AICache
 	User        user.UserCache
 	Video       video.VideoCache
 	Interaction interaction.InteractionCache
@@ -19,6 +21,7 @@ type CacheSet struct {
 
 func NewCacheSet(rdb *redis.Client) *CacheSet {
 	return &CacheSet{
+		AI:          ai.NewAICache(rdb),
 		User:        user.NewUserCache(rdb),
 		Video:       video.NewVideoCache(rdb),
 		Interaction: interaction.NewInteractionCache(rdb),

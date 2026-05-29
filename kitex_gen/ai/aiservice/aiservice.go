@@ -20,6 +20,13 @@ var serviceMethods = map[string]kitex.MethodInfo{
 		false,
 		kitex.WithStreamingMode(kitex.StreamingNone),
 	),
+	"ProactiveCheck": kitex.NewMethodInfo(
+		proactiveCheckHandler,
+		newAIServiceProactiveCheckArgs,
+		newAIServiceProactiveCheckResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingNone),
+	),
 	"CreateBot": kitex.NewMethodInfo(
 		createBotHandler,
 		newAIServiceCreateBotArgs,
@@ -221,6 +228,24 @@ func newAIServiceProcessMessageArgs() interface{} {
 
 func newAIServiceProcessMessageResult() interface{} {
 	return ai.NewAIServiceProcessMessageResult()
+}
+
+func proactiveCheckHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*ai.AIServiceProactiveCheckArgs)
+	realResult := result.(*ai.AIServiceProactiveCheckResult)
+	success, err := handler.(ai.AIService).ProactiveCheck(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newAIServiceProactiveCheckArgs() interface{} {
+	return ai.NewAIServiceProactiveCheckArgs()
+}
+
+func newAIServiceProactiveCheckResult() interface{} {
+	return ai.NewAIServiceProactiveCheckResult()
 }
 
 func createBotHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
@@ -544,6 +569,16 @@ func (p *kClient) ProcessMessage(ctx context.Context, req *ai.ProcessMessageReq)
 	_args.Req = req
 	var _result ai.AIServiceProcessMessageResult
 	if err = p.c.Call(ctx, "ProcessMessage", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) ProactiveCheck(ctx context.Context, req *ai.ProactiveCheckReq) (r *ai.ProactiveCheckResp, err error) {
+	var _args ai.AIServiceProactiveCheckArgs
+	_args.Req = req
+	var _result ai.AIServiceProactiveCheckResult
+	if err = p.c.Call(ctx, "ProactiveCheck", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

@@ -168,9 +168,8 @@ func handleGroupMessage(ctx context.Context, service *apichat.WSService, uid uin
 		}
 	}
 
-	// Trigger AI bots in the group
-	// Use background context since this runs async in a goroutine
-	go triggerAIBots(context.Background(), push.GroupId, push.FromUid, push.Content, push.Timestamp, push.MsgId)
+	go triggerAIBots(rpccontext.WithLoginUid(context.Background(), uid), push.GroupId, push.FromUid, push.Content, push.Timestamp, push.MsgId)
+	go triggerProactiveCheck(rpccontext.WithLoginUid(context.Background(), uid), push.GroupId, push.FromUid, push.Content, push.Timestamp, push.MsgId)
 }
 
 func triggerAIBots(ctx context.Context, groupID, fromUID uint, content string, timestamp, msgID int64) {
@@ -198,6 +197,19 @@ func triggerAIBots(ctx context.Context, groupID, fromUID uint, content string, t
 		if err != nil {
 			log.Printf("triggerAIBots: ProcessMessage failed bot=%s: %v", bot.BotId, err)
 		}
+	}
+}
+
+func triggerProactiveCheck(ctx context.Context, groupID, fromUID uint, content string, timestamp, msgID int64) {
+	_, err := rpc.ProactiveCheckRPC(ctx, &kitexai.ProactiveCheckReq{
+		GroupId:   util.Uint2String(groupID),
+		MsgId:     msgID,
+		FromUid:   util.Uint2String(fromUID),
+		Content:   content,
+		Timestamp: timestamp,
+	})
+	if err != nil {
+		log.Printf("triggerProactiveCheck: ProactiveCheck failed group=%d msg=%d: %v", groupID, msgID, err)
 	}
 }
 
