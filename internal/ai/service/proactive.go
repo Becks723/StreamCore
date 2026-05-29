@@ -4,13 +4,11 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strconv"
 	"time"
 
 	"StreamCore/internal/pkg/pack"
 	kitexai "StreamCore/kitex_gen/ai"
 	"StreamCore/pkg/util"
-	"github.com/redis/go-redis/v9"
 )
 
 const (
@@ -41,9 +39,8 @@ func ProactiveCheck(s *AIService, req *kitexai.ProactiveCheckReq) (*kitexai.Proa
 		return resp, nil
 	}
 
-	pendingKey := proactivePendingKey(groupID)
 	quietDelay := time.Duration(cfg.QuietMinutes) * time.Minute
-	if err := s.rdb.Set(s.ctx, pendingKey, strconv.FormatInt(req.MsgId, 10), quietDelay+proactivePendingTTL).Err(); err != nil {
+	if err := s.infra.Cache.AI.SetProactivePending(s.ctx, groupID, req.MsgId, quietDelay+proactivePendingTTL); err != nil {
 		return nil, fmt.Errorf("ProactiveCheck: set pending key: %w", err)
 	}
 
@@ -80,12 +77,12 @@ func selectProactiveBot(ctx context.Context, s *AIService, groupID, fromUID uint
 }
 
 func runProactiveCheck(ctx context.Context, s *AIService, groupID, botID uint, msgID int64, cfg *pack.ProactiveConfig) error {
-	pendingMsgID, err := s.rdb.Get(ctx, proactivePendingKey(groupID)).Int64()
-	if err == redis.Nil {
-		return nil
-	}
+	pendingMsgID, ok, err := s.infra.Cache.AI.GetProactivePending(ctx, groupID)
 	if err != nil {
 		return fmt.Errorf("get proactive pending key: %w", err)
+	}
+	if !ok {
+		return nil
 	}
 	if pendingMsgID != msgID {
 		return nil
@@ -116,40 +113,27 @@ func runProactiveCheck(ctx context.Context, s *AIService, groupID, botID uint, m
 }
 
 func proactiveAllowed(ctx context.Context, s *AIService, groupID, botID uint, cfg *pack.ProactiveConfig) (bool, error) {
-	exists, err := s.rdb.Exists(ctx, proactiveCooldownKey(groupID, botID)).Result()
+	coolingDown, err := s.infra.Cache.AI.IsProactiveCoolingDown(ctx, groupID, botID)
 	if err != nil {
 		return false, fmt.Errorf("check proactive cooldown: %w", err)
 	}
-	if exists > 0 {
+	if coolingDown {
 		return false, nil
 	}
 
-	count, err := s.rdb.Get(ctx, proactiveDailyKey(groupID, botID)).Int64()
-	if err != nil && err != redis.Nil {
+	count, err := s.infra.Cache.AI.ProactiveDailyCount(ctx, groupID, botID)
+	if err != nil {
 		return false, fmt.Errorf("check proactive daily count: %w", err)
 	}
 	return count < cfg.MaxPerDay, nil
 }
 
 func markProactiveSent(ctx context.Context, s *AIService, groupID, botID uint, cfg *pack.ProactiveConfig) error {
-	if err := s.rdb.Set(ctx, proactiveCooldownKey(groupID, botID), "1", time.Duration(cfg.CooldownMinutes)*time.Minute).Err(); err != nil {
-		return err
-	}
-	dailyKey := proactiveDailyKey(groupID, botID)
-	if err := s.rdb.Incr(ctx, dailyKey).Err(); err != nil {
-		return err
-	}
-	return s.rdb.Expire(ctx, dailyKey, 48*time.Hour).Err()
-}
-
-func proactivePendingKey(groupID uint) string {
-	return fmt.Sprintf("ai:proactive:pending:%d", groupID)
-}
-
-func proactiveCooldownKey(groupID, botID uint) string {
-	return fmt.Sprintf("ai:proactive:last:%d:%d", groupID, botID)
-}
-
-func proactiveDailyKey(groupID, botID uint) string {
-	return fmt.Sprintf("ai:proactive:daily:%s:%d:%d", time.Now().Format("20060102"), groupID, botID)
+	return s.infra.Cache.AI.MarkProactiveSent(
+		ctx,
+		groupID,
+		botID,
+		time.Duration(cfg.CooldownMinutes)*time.Minute,
+		48*time.Hour,
+	)
 }
