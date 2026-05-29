@@ -12,6 +12,7 @@ import (
 // Client is designed to provide IDL-compatible methods with call-option parameter for kitex framework.
 type Client interface {
 	ProcessMessage(ctx context.Context, req *ai.ProcessMessageReq, callOptions ...callopt.Option) (r *ai.ProcessMessageResp, err error)
+	ProactiveCheck(ctx context.Context, req *ai.ProactiveCheckReq, callOptions ...callopt.Option) (r *ai.ProactiveCheckResp, err error)
 	CreateBot(ctx context.Context, req *ai.CreateBotReq, callOptions ...callopt.Option) (r *ai.CreateBotResp, err error)
 	UpdateBot(ctx context.Context, req *ai.UpdateBotReq, callOptions ...callopt.Option) (r *ai.UpdateBotResp, err error)
 	ListBots(ctx context.Context, req *ai.ListBotsReq, callOptions ...callopt.Option) (r *ai.ListBotsResp, err error)
@@ -63,6 +64,11 @@ type kAIServiceClient struct {
 func (p *kAIServiceClient) ProcessMessage(ctx context.Context, req *ai.ProcessMessageReq, callOptions ...callopt.Option) (r *ai.ProcessMessageResp, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.ProcessMessage(ctx, req)
+}
+
+func (p *kAIServiceClient) ProactiveCheck(ctx context.Context, req *ai.ProactiveCheckReq, callOptions ...callopt.Option) (r *ai.ProactiveCheckResp, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.ProactiveCheck(ctx, req)
 }
 
 func (p *kAIServiceClient) CreateBot(ctx context.Context, req *ai.CreateBotReq, callOptions ...callopt.Option) (r *ai.CreateBotResp, err error) {

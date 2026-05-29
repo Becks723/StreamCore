@@ -158,3 +158,14 @@ func ProcessMessageRPC(ctx context.Context, req *ai.ProcessMessageReq) (*ai.Proc
 	}
 	return resp, nil
 }
+
+func ProactiveCheckRPC(ctx context.Context, req *ai.ProactiveCheckReq) (*ai.ProactiveCheckResp, error) {
+	if aiClient == nil {
+		return nil, errors.New("ai rpc client not initialized")
+	}
+	resp, err := aiClient.ProactiveCheck(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("proactive check rpc call failed: %w", err)
+	}
+	return resp, nil
+}

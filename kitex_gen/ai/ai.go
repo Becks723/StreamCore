@@ -156,6 +156,127 @@ var fieldIDToName_ProcessMessageResp = map[int16]string{
 	3: "estimated_sec",
 }
 
+type ProactiveCheckReq struct {
+	GroupId   string `thrift:"group_id,1,required" frugal:"1,required,string" json:"group_id"`
+	MsgId     int64  `thrift:"msg_id,2,required" frugal:"2,required,i64" json:"msg_id"`
+	FromUid   string `thrift:"from_uid,3,required" frugal:"3,required,string" json:"from_uid"`
+	Content   string `thrift:"content,4,required" frugal:"4,required,string" json:"content"`
+	Timestamp int64  `thrift:"timestamp,5,required" frugal:"5,required,i64" json:"timestamp"`
+}
+
+func NewProactiveCheckReq() *ProactiveCheckReq {
+	return &ProactiveCheckReq{}
+}
+
+func (p *ProactiveCheckReq) InitDefault() {
+}
+
+func (p *ProactiveCheckReq) GetGroupId() (v string) {
+	return p.GroupId
+}
+
+func (p *ProactiveCheckReq) GetMsgId() (v int64) {
+	return p.MsgId
+}
+
+func (p *ProactiveCheckReq) GetFromUid() (v string) {
+	return p.FromUid
+}
+
+func (p *ProactiveCheckReq) GetContent() (v string) {
+	return p.Content
+}
+
+func (p *ProactiveCheckReq) GetTimestamp() (v int64) {
+	return p.Timestamp
+}
+func (p *ProactiveCheckReq) SetGroupId(val string) {
+	p.GroupId = val
+}
+func (p *ProactiveCheckReq) SetMsgId(val int64) {
+	p.MsgId = val
+}
+func (p *ProactiveCheckReq) SetFromUid(val string) {
+	p.FromUid = val
+}
+func (p *ProactiveCheckReq) SetContent(val string) {
+	p.Content = val
+}
+func (p *ProactiveCheckReq) SetTimestamp(val int64) {
+	p.Timestamp = val
+}
+
+func (p *ProactiveCheckReq) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("ProactiveCheckReq(%+v)", *p)
+}
+
+var fieldIDToName_ProactiveCheckReq = map[int16]string{
+	1: "group_id",
+	2: "msg_id",
+	3: "from_uid",
+	4: "content",
+	5: "timestamp",
+}
+
+type ProactiveCheckResp struct {
+	Base      *common.BaseResp `thrift:"base,1,required" frugal:"1,required,common.BaseResp" json:"base"`
+	Scheduled *bool            `thrift:"scheduled,2,optional" frugal:"2,optional,bool" json:"scheduled,omitempty"`
+}
+
+func NewProactiveCheckResp() *ProactiveCheckResp {
+	return &ProactiveCheckResp{}
+}
+
+func (p *ProactiveCheckResp) InitDefault() {
+}
+
+var ProactiveCheckResp_Base_DEFAULT *common.BaseResp
+
+func (p *ProactiveCheckResp) GetBase() (v *common.BaseResp) {
+	if !p.IsSetBase() {
+		return ProactiveCheckResp_Base_DEFAULT
+	}
+	return p.Base
+}
+
+var ProactiveCheckResp_Scheduled_DEFAULT bool
+
+func (p *ProactiveCheckResp) GetScheduled() (v bool) {
+	if !p.IsSetScheduled() {
+		return ProactiveCheckResp_Scheduled_DEFAULT
+	}
+	return *p.Scheduled
+}
+func (p *ProactiveCheckResp) SetBase(val *common.BaseResp) {
+	p.Base = val
+}
+func (p *ProactiveCheckResp) SetScheduled(val *bool) {
+	p.Scheduled = val
+}
+
+func (p *ProactiveCheckResp) IsSetBase() bool {
+	return p.Base != nil
+}
+
+func (p *ProactiveCheckResp) IsSetScheduled() bool {
+	return p.Scheduled != nil
+}
+
+func (p *ProactiveCheckResp) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("ProactiveCheckResp(%+v)", *p)
+}
+
+var fieldIDToName_ProactiveCheckResp = map[int16]string{
+	1: "base",
+	2: "scheduled",
+}
+
 type CreateBotReq struct {
 	BotName      string   `thrift:"bot_name,1,required" frugal:"1,required,string" json:"bot_name"`
 	SystemPrompt string   `thrift:"system_prompt,2,required" frugal:"2,required,string" json:"system_prompt"`
@@ -2033,6 +2154,8 @@ var fieldIDToName_ListCredentialsResp = map[int16]string{
 type AIService interface {
 	ProcessMessage(ctx context.Context, req *ProcessMessageReq) (r *ProcessMessageResp, err error)
 
+	ProactiveCheck(ctx context.Context, req *ProactiveCheckReq) (r *ProactiveCheckResp, err error)
+
 	CreateBot(ctx context.Context, req *CreateBotReq) (r *CreateBotResp, err error)
 
 	UpdateBot(ctx context.Context, req *UpdateBotReq) (r *UpdateBotResp, err error)
@@ -2141,6 +2264,82 @@ func (p *AIServiceProcessMessageResult) String() string {
 }
 
 var fieldIDToName_AIServiceProcessMessageResult = map[int16]string{
+	0: "success",
+}
+
+type AIServiceProactiveCheckArgs struct {
+	Req *ProactiveCheckReq `thrift:"req,1,required" frugal:"1,required,ProactiveCheckReq" json:"req"`
+}
+
+func NewAIServiceProactiveCheckArgs() *AIServiceProactiveCheckArgs {
+	return &AIServiceProactiveCheckArgs{}
+}
+
+func (p *AIServiceProactiveCheckArgs) InitDefault() {
+}
+
+var AIServiceProactiveCheckArgs_Req_DEFAULT *ProactiveCheckReq
+
+func (p *AIServiceProactiveCheckArgs) GetReq() (v *ProactiveCheckReq) {
+	if !p.IsSetReq() {
+		return AIServiceProactiveCheckArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+func (p *AIServiceProactiveCheckArgs) SetReq(val *ProactiveCheckReq) {
+	p.Req = val
+}
+
+func (p *AIServiceProactiveCheckArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *AIServiceProactiveCheckArgs) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("AIServiceProactiveCheckArgs(%+v)", *p)
+}
+
+var fieldIDToName_AIServiceProactiveCheckArgs = map[int16]string{
+	1: "req",
+}
+
+type AIServiceProactiveCheckResult struct {
+	Success *ProactiveCheckResp `thrift:"success,0,optional" frugal:"0,optional,ProactiveCheckResp" json:"success,omitempty"`
+}
+
+func NewAIServiceProactiveCheckResult() *AIServiceProactiveCheckResult {
+	return &AIServiceProactiveCheckResult{}
+}
+
+func (p *AIServiceProactiveCheckResult) InitDefault() {
+}
+
+var AIServiceProactiveCheckResult_Success_DEFAULT *ProactiveCheckResp
+
+func (p *AIServiceProactiveCheckResult) GetSuccess() (v *ProactiveCheckResp) {
+	if !p.IsSetSuccess() {
+		return AIServiceProactiveCheckResult_Success_DEFAULT
+	}
+	return p.Success
+}
+func (p *AIServiceProactiveCheckResult) SetSuccess(x interface{}) {
+	p.Success = x.(*ProactiveCheckResp)
+}
+
+func (p *AIServiceProactiveCheckResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *AIServiceProactiveCheckResult) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("AIServiceProactiveCheckResult(%+v)", *p)
+}
+
+var fieldIDToName_AIServiceProactiveCheckResult = map[int16]string{
 	0: "success",
 }
 

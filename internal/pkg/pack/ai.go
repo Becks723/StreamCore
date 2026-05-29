@@ -12,11 +12,19 @@ import (
 
 // BotConfigData is used for JSON serialization of bot_config.
 type BotConfigData struct {
-	SystemPrompt string   `json:"system_prompt"`
-	Provider     string   `json:"provider"`   // references provider.name in config
-	ModelName    string   `json:"model_name"` // optional, overrides provider's default_model
-	TriggerMode  int32    `json:"trigger_mode"`
-	ToolIDs      []string `json:"tool_ids"`
+	SystemPrompt string          `json:"system_prompt"`
+	Provider     string          `json:"provider"`   // references provider.name in config
+	ModelName    string          `json:"model_name"` // optional, overrides provider's default_model
+	TriggerMode  int32           `json:"trigger_mode"`
+	ToolIDs      []string        `json:"tool_ids"`
+	Proactive    ProactiveConfig `json:"proactive"`
+}
+
+type ProactiveConfig struct {
+	Enabled         bool  `json:"enabled"`
+	QuietMinutes    int64 `json:"quiet_minutes"`
+	CooldownMinutes int64 `json:"cooldown_minutes"`
+	MaxPerDay       int64 `json:"max_per_day"`
 }
 
 // BotConfigToJSON marshals BotConfigData to JSON string.
@@ -27,6 +35,7 @@ func BotConfigToJSON(cfg *BotConfigData) string {
 	if cfg.ToolIDs == nil {
 		cfg.ToolIDs = []string{}
 	}
+	normalizeProactiveConfig(&cfg.Proactive)
 	data, _ := sonic.MarshalString(cfg)
 	return data
 }
@@ -47,7 +56,23 @@ func ParseBotConfig(raw *string) *BotConfigData {
 	if cfg.ToolIDs == nil {
 		cfg.ToolIDs = []string{}
 	}
+	normalizeProactiveConfig(&cfg.Proactive)
 	return cfg
+}
+
+func normalizeProactiveConfig(cfg *ProactiveConfig) {
+	if cfg == nil || !cfg.Enabled {
+		return
+	}
+	if cfg.QuietMinutes <= 0 {
+		cfg.QuietMinutes = 5
+	}
+	if cfg.CooldownMinutes <= 0 {
+		cfg.CooldownMinutes = 30
+	}
+	if cfg.MaxPerDay <= 0 {
+		cfg.MaxPerDay = 5
+	}
 }
 
 // BotInfo converts a UserModel (is_bot=1) to thrift BotInfo.
