@@ -44,6 +44,16 @@ func (s *AIServiceImpl) ProcessMessage(ctx context.Context, req *kitexai.Process
 	return service.ProcessMessage(svc, req)
 }
 
+func (s *AIServiceImpl) ProactiveCheck(ctx context.Context, req *kitexai.ProactiveCheckReq) (*kitexai.ProactiveCheckResp, error) {
+	_, err := rpccontext.RetrieveLoginUid(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("AIService.ProactiveCheck: %w", err)
+	}
+
+	svc := service.NewAIService(ctx, s.infra, s.agent, s.toolReg)
+	return service.ProactiveCheck(svc, req)
+}
+
 func (s *AIServiceImpl) CreateBot(ctx context.Context, req *kitexai.CreateBotReq) (*kitexai.CreateBotResp, error) {
 	_, err := rpccontext.RetrieveLoginUid(ctx)
 	if err != nil {

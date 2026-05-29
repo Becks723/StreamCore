@@ -19,6 +19,19 @@ struct ProcessMessageResp {
     3: optional string estimated_sec    // 预计回复等待时间
 }
 
+struct ProactiveCheckReq {
+    1: required string group_id          // 群 ID
+    2: required i64 msg_id              // 触发检查的真人消息 ID
+    3: required string from_uid         // 发消息的用户
+    4: required string content          // 消息文本
+    5: required i64 timestamp           // 消息时间戳（ms）
+}
+
+struct ProactiveCheckResp {
+    1: required common.BaseResp base
+    2: optional bool scheduled          // 是否登记了冷场检查
+}
+
 // ========================== Bot CRUD ==========================
 
 struct CreateBotReq {
@@ -220,6 +233,8 @@ struct ListCredentialsResp {
 service AIService {
     // 核心：接收聊天消息，AI 异步处理后以 Bot 身份回写群聊
     ProcessMessageResp ProcessMessage(1: required ProcessMessageReq req)
+    // 内部 RPC：登记群聊冷场检查，满足条件后 AI 主动回写群聊
+    ProactiveCheckResp ProactiveCheck(1: required ProactiveCheckReq req)
 
     // Bot CRUD
     CreateBotResp CreateBot(1: required CreateBotReq req)
